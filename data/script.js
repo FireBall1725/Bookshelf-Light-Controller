@@ -216,7 +216,7 @@ function parseRealFirmwareMetadata(infoText, filename) {
     
     // Add description with proper format
     if (description !== 'Unknown') {
-        features.push(`Description: ${description}`);
+        features.push(description);
     }
     
     // Add firmware features section

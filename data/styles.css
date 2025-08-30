@@ -386,7 +386,7 @@ h3 {
     padding: 2px 0;
 }
 
-/* Style for the "Firmware Features:" title */
+/* Style for the description (first item) */
 .firmware-feature:first-child {
     font-weight: bold;
     color: #007bff;
@@ -394,8 +394,16 @@ h3 {
     font-size: 1em;
 }
 
-/* Style for bullet points */
-.firmware-feature:not(:first-child) {
+/* Style for the "Firmware Features:" title (second item) */
+.firmware-feature:nth-child(2) {
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+/* Style for bullet points (third item onwards) */
+.firmware-feature:nth-child(n+3) {
     padding-left: 8px;
 }
 

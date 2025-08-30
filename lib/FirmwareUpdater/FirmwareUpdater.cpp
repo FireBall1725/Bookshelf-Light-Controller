@@ -844,7 +844,14 @@ String FirmwareUpdater::generateFirmwareFilename(const String& version, const St
     String filename = "firmware-";
     filename += version;
     filename += "-";
-    filename += board;
+    
+    // Remove "FL" prefix from board name if it exists
+    String displayBoard = board;
+    if (displayBoard.startsWith("FL-")) {
+        displayBoard = displayBoard.substring(3); // Remove "FL-" prefix
+    }
+    
+    filename += displayBoard;
     filename += ".bin";
     return filename;
 }

@@ -155,13 +155,73 @@ function getFirmwareInfo(filename) {
     fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
         .then(response => response.text())
         .then(data => {
-            // Show firmware info in a notification instead
-            showNotification('Firmware Info: ' + data.substring(0, 100) + '...', 'info');
+            // Parse the firmware info and extract features
+            const features = extractFeaturesFromInfo(data);
+            displayFirmwareDetails(features);
         })
         .catch(error => {
             console.error('Error getting firmware info:', error);
             showNotification('Failed to get firmware info', 'error');
         });
+}
+
+function extractFeaturesFromInfo(infoText) {
+    const features = [];
+    const lines = infoText.split('\n');
+    
+    // Extract key information from the firmware info
+    let version = 'Unknown';
+    let description = 'Unknown';
+    let board = 'Unknown';
+    let buildDate = 'Unknown';
+    
+    lines.forEach(line => {
+        if (line.startsWith('Version:')) {
+            version = line.split('Version:')[1].trim();
+        } else if (line.startsWith('Description:')) {
+            description = line.split('Description:')[1].trim();
+        } else if (line.startsWith('Board:')) {
+            board = line.split('Board:')[1].trim();
+        } else if (line.startsWith('Build Date:')) {
+            buildDate = line.split('Build Date:')[1].trim();
+        }
+    });
+    
+    // Create feature list based on available information
+    if (version !== 'Unknown') features.push(`Version: ${version}`);
+    if (description !== 'Unknown') features.push(`Description: ${description}`);
+    if (board !== 'Unknown') features.push(`Board: ${board}`);
+    if (buildDate !== 'Unknown') features.push(`Build Date: ${buildDate}`);
+    
+    // Add some additional context
+    features.push('Intel HEX firmware file for ATtiny1616');
+    features.push('I2C slave communication');
+    features.push('EEPROM address persistence');
+    features.push('Firmware update framework');
+    
+    return features;
+}
+
+function displayFirmwareDetails(features) {
+    const detailsSection = document.getElementById('firmwareDetails');
+    const featuresContainer = document.getElementById('firmwareFeatures');
+    
+    // Clear previous features
+    featuresContainer.innerHTML = '';
+    
+    // Add each feature
+    features.forEach(feature => {
+        const featureElement = document.createElement('div');
+        featureElement.className = 'firmware-feature';
+        featureElement.textContent = feature;
+        featuresContainer.appendChild(featureElement);
+    });
+    
+    // Show the details section
+    detailsSection.style.display = 'block';
+    
+    // Scroll to the details section
+    detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Firmware Update Functions

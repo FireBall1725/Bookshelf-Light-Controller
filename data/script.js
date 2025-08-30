@@ -7,7 +7,10 @@ let firmwareData = null;
 document.addEventListener('DOMContentLoaded', function() {
     refreshLog();
     refreshDeviceInfo();
-    refreshFirmwareTable(); // Load firmware table on page load
+    // Add a small delay to ensure everything is ready before loading firmware table
+    setTimeout(() => {
+        refreshFirmwareTable(); // Load firmware table on page load
+    }, 100);
     startPeriodicUpdates();
 });
 
@@ -41,42 +44,40 @@ function sendI2CCommand(command) {
 }
 
 // Firmware Management Functions
-function listStoredFirmware() {
-    fetch('/firmware/list')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('storedFirmwareInfo').textContent = data;
-            showNotification('Firmware list retrieved', 'success');
-        })
-        .catch(error => {
-            console.error('Error listing firmware:', error);
-            showNotification('Failed to list firmware', 'error');
-        });
-}
+// Note: These functions are no longer used but kept for potential future use
 
 function refreshFirmwareTable() {
+    console.log('Refreshing firmware table...');
     fetch('/firmware/all')
         .then(response => response.text())
         .then(data => {
+            console.log('Firmware data received:', data);
             populateFirmwareTable(data);
-            showNotification('Firmware table refreshed', 'success');
         })
         .catch(error => {
             console.error('Error refreshing firmware table:', error);
-            showNotification('Failed to refresh firmware table', 'error');
+            // Don't show notification for automatic refresh on page load
         });
 }
 
 function populateFirmwareTable(firmwareData) {
+    console.log('Populating firmware table with data:', firmwareData);
     const tbody = document.getElementById('firmwareTableBody');
     
     if (firmwareData.includes('No firmware packages found')) {
+        console.log('No firmware packages found, showing empty table');
         tbody.innerHTML = '<tr><td colspan="6">No firmware packages found</td></tr>';
         return;
     }
     
     // Parse the firmware data
-    const packages = firmwareData.split('---');
+    let packages;
+    if (firmwareData.includes('---')) {
+        packages = firmwareData.split('---');
+    } else {
+        // Single package case - wrap in array
+        packages = [firmwareData];
+    }
     let tableHTML = '';
     
     packages.forEach(package => {
@@ -151,8 +152,8 @@ function getFirmwareInfo(filename) {
     fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
         .then(response => response.text())
         .then(data => {
-            document.getElementById('storedFirmwareInfo').textContent = data;
-            showNotification('Firmware info retrieved', 'success');
+            // Show firmware info in a notification instead
+            showNotification('Firmware Info: ' + data.substring(0, 100) + '...', 'info');
         })
         .catch(error => {
             console.error('Error getting firmware info:', error);

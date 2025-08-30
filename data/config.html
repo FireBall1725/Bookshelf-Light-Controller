@@ -3,6 +3,7 @@
 <head>
     <title>MQTT Configuration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -29,6 +30,11 @@
             margin-bottom: 5px; 
             font-weight: bold; 
             color: #34495e;
+        }
+        label i {
+            margin-right: 8px;
+            color: #3498db;
+            width: 16px;
         }
         input[type="text"], input[type="number"], input[type="password"] { 
             width: 100%; 
@@ -97,38 +103,38 @@
         <h1>MQTT Configuration</h1>
         <form id="mqttForm">
             <div class="form-group">
-                <label>MQTT Broker IP:</label>
+                <label><i class="fas fa-server"></i> MQTT Broker IP:</label>
                 <input type="text" id="brokerIP" required>
             </div>
             <div class="form-group">
-                <label>MQTT Broker Port:</label>
+                <label><i class="fas fa-network-wired"></i> MQTT Broker Port:</label>
                 <input type="number" id="brokerPort" value="1883" required>
             </div>
             <div class="form-group">
-                <label>Username (optional):</label>
+                <label><i class="fas fa-user"></i> Username (optional):</label>
                 <input type="text" id="username">
             </div>
             <div class="form-group">
-                <label>Password (optional):</label>
+                <label><i class="fas fa-lock"></i> Password (optional):</label>
                 <input type="password" id="password">
             </div>
             <div class="form-group">
-                <label>Device Name:</label>
+                <label><i class="fas fa-microchip"></i> Device Name:</label>
                 <input type="text" id="deviceName" required>
             </div>
             <div class="form-group">
-                <label>Device ID:</label>
+                <label><i class="fas fa-fingerprint"></i> Device ID:</label>
                 <input type="text" id="deviceId" required>
             </div>
             <div class="form-group">
-                <label>MQTT Prefix:</label>
+                <label><i class="fas fa-tags"></i> MQTT Prefix:</label>
                 <input type="text" id="mqttPrefix" value="homeassistant" required>
             </div>
-            <button type="submit">Save Configuration</button>
+            <button type="submit"><i class="fas fa-save"></i> Save Configuration</button>
         </form>
         <div id="message"></div>
         <div class="back-link">
-            <a href="/">← Back to Main Page</a>
+            <a href="/"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
         </div>
     </div>
     

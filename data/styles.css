@@ -297,26 +297,7 @@ h3 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.version-info {
-    margin-top: 20px;
-    padding: 15px;
-    background: #e9ecef;
-    border-radius: 10px;
-    border-left: 4px solid #007bff;
-}
 
-.version-info strong {
-    color: #495057;
-    font-size: 1.1em;
-}
-
-.version-info span {
-    font-family: 'Courier New', monospace;
-    font-size: 0.9em;
-    color: #6c757d;
-    display: block;
-    margin: 5px 0;
-}
 
 /* Device Info Section */
 .info {

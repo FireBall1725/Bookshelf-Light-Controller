@@ -228,12 +228,8 @@ function uploadFirmware() {
             uploadBtn.disabled = true;
             updateBtn.disabled = false;
             
-            // Show version info and populate with firmware details
-            const versionInfo = document.getElementById('versionInfo');
-            versionInfo.style.display = 'block';
-            
-            // Get firmware info to populate version details
-            getFirmwareInfo();
+            // Auto-refresh the firmware table to show the new upload
+            refreshFirmwareTable();
             
             showNotification('Firmware uploaded to SPIFFS successfully!', 'success');
         } else {
@@ -266,13 +262,11 @@ function startFirmwareUpdate() {
     const firmwareStatus = document.getElementById('firmwareStatus');
     const progressBar = document.getElementById('progressBar');
     const progressFill = document.getElementById('progressFill');
-    const versionInfo = document.getElementById('versionInfo');
     
     updateBtn.disabled = true;
     firmwareStatus.textContent = 'Starting firmware update...';
     progressBar.style.display = 'block';
     progressFill.style.width = '0%';
-    versionInfo.style.display = 'none';
     
     // Simulate update progress
     let progress = 0;
@@ -292,7 +286,6 @@ function startFirmwareUpdate() {
             
             if (data.includes('ATtiny1616 firmware update completed successfully')) {
                 firmwareStatus.textContent = 'Update successful! Device should reboot.';
-                versionInfo.style.display = 'block';
                 showNotification('Firmware update completed successfully!', 'success');
             } else {
                 firmwareStatus.textContent = 'Firmware update failed: ' + data;
@@ -321,7 +314,6 @@ function cancelUpdate() {
     document.getElementById('uploadBtn').disabled = true;
     document.getElementById('updateBtn').disabled = true;
     document.getElementById('progressBar').style.display = 'none';
-    document.getElementById('versionInfo').style.display = 'none';
     document.getElementById('firmwareFile').value = '';
     
     showNotification('Update cancelled', 'info');
@@ -332,12 +324,7 @@ function checkVersion() {
     fetch('/versioncheck')
         .then(response => response.text())
         .then(data => {
-            const versionInfo = document.getElementById('versionInfo');
-            const currentVersion = document.getElementById('currentVersion');
-            currentVersion.textContent = 'Current: ' + data;
-            versionInfo.style.display = 'block';
-            
-            showNotification('Version check completed', 'success');
+            showNotification('Version check completed: ' + data, 'success');
             refreshLog();
         })
         .catch(error => {

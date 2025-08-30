@@ -206,37 +206,22 @@ function parseRealFirmwareMetadata(infoText, filename) {
     const lines = infoText.split('\n');
     
     // Extract key information from the actual firmware package
-    let version = 'Unknown';
     let description = 'Unknown';
-    let board = 'Unknown';
-    let buildDate = 'Unknown';
     let packageType = 'Unknown';
     
     lines.forEach(line => {
-        if (line.startsWith('Version:')) {
-            version = line.split('Version:')[1].trim();
-        } else if (line.startsWith('Description:')) {
+        if (line.startsWith('Description:')) {
             description = line.split('Description:')[1].trim();
-        } else if (line.startsWith('Board:')) {
-            board = line.split('Board:')[1].trim();
-        } else if (line.startsWith('Build Date:')) {
-            buildDate = line.split('Build Date:')[1].trim();
         } else if (line.startsWith('Type:')) {
             packageType = line.split('Type:')[1].trim();
         }
     });
     
-    // Add real metadata from the .bin file
-    if (version !== 'Unknown') features.push(`Version: ${version}`);
-    if (description !== 'Unknown') features.push(`Description: ${description}`);
-    if (board !== 'Unknown') features.push(`Board: ${board}`);
-    if (buildDate !== 'Unknown') features.push(`Build Date: ${buildDate}`);
-    if (packageType !== 'Unknown') features.push(`Package Type: ${packageType}`);
+    // Only show info that's not already in the table
+    if (description !== 'Unknown') features.push(description);
+    if (packageType !== 'Unknown') features.push(packageType);
     
-    // Add filename info
-    features.push(`Filename: ${filename}`);
-    
-    // Add technical details based on the actual firmware
+    // Add technical details
     features.push('Intel HEX firmware file for ATtiny1616');
     features.push('I2C slave communication');
     features.push('EEPROM address persistence');

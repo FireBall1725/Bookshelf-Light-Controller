@@ -763,16 +763,41 @@ String FirmwareUpdater::getFirmwarePackageInfo(const String& filename) {
     info += "Modified: " + String(lastModified) + "\n";
     info += "Type: Firmware Package (.bin)\n";
     
-                // Try to get metadata info if available
-            if (SPIFFS.exists("/firmware.meta")) {
-                String version, description, buildDate, board;
-                if (parseFirmwareMetadata("/firmware.meta", version, description, buildDate, board)) {
-                    info += "Version: " + version + "\n";
-                    info += "Description: " + description + "\n";
-                    info += "Build Date: " + buildDate + "\n";
-                    info += "Board: " + board + "\n";
+    // Parse metadata directly from the .bin package
+    if (size >= 10) {
+        File packageFile = SPIFFS.open(filepath, "r");
+        if (packageFile) {
+            // Read the package header to get metadata
+            uint8_t header[10];
+            packageFile.read(header, 10);
+            packageFile.close();
+            
+            // Check magic header "FLFW\0" (5 bytes)
+            const char* expectedMagic = "FLFW\0";
+            if (memcmp(header, expectedMagic, 5) == 0) {
+                // Read metadata length (4 bytes, little-endian)
+                uint32_t metadataLength = header[5] | (header[6] << 8) | 
+                                          (header[7] << 16) | (header[8] << 24);
+                
+                if (metadataLength > 0 && metadataLength <= 2048) {
+                    // Read metadata
+                    packageFile = SPIFFS.open(filepath, "r");
+                    packageFile.seek(9); // Skip magic + length
+                    String metadataJson = packageFile.readString();
+                    packageFile.close();
+                    
+                    // Parse metadata
+                    String version, description, buildDate, board;
+                    if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
+                        info += "Version: " + version + "\n";
+                        info += "Description: " + description + "\n";
+                        info += "Build Date: " + buildDate + "\n";
+                        info += "Board: " + board + "\n";
+                    }
                 }
             }
+        }
+    }
     
     return info;
 }

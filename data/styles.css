@@ -386,6 +386,19 @@ h3 {
     padding: 2px 0;
 }
 
+/* Style for the "Firmware Features:" title */
+.firmware-feature:first-child {
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+/* Style for bullet points */
+.firmware-feature:not(:first-child) {
+    padding-left: 8px;
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;

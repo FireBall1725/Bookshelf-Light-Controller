@@ -221,11 +221,11 @@ function parseRealFirmwareMetadata(infoText, filename) {
     
     // Add firmware features section
     features.push('Firmware Features:');
-    features.push('    "WS2812B LED control"');
-    features.push('    "Button input with mode cycling"');
-    features.push('    "I2C slave communication"');
-    features.push('    "EEPROM address persistence"');
-    features.push('    "Firmware update framework"');
+    features.push('• WS2812B LED control');
+    features.push('• Button input with mode cycling');
+    features.push('• I2C slave communication');
+    features.push('• EEPROM address persistence');
+    features.push('• Firmware update framework');
     
     return features;
 }

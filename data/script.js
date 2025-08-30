@@ -5,24 +5,76 @@ let selectedFile = null;
 let firmwareData = null;
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
     refreshLog();
     // Add a small delay to ensure everything is ready before loading firmware table
     setTimeout(() => {
         refreshFirmwareTable(); // Load firmware table on page load
     }, 100);
     startPeriodicUpdates();
+    
+    // Add responsive behavior
+    setupResponsiveBehavior();
 });
+
+// Responsive behavior setup
+function setupResponsiveBehavior() {
+    // Handle window resize
+    $(window).on('resize', function() {
+        adjustLayoutForScreenSize();
+    });
+    
+    // Initial layout adjustment
+    adjustLayoutForScreenSize();
+    
+    // Add touch-friendly interactions for mobile
+    if ($(window).width() < 768) {
+        setupMobileInteractions();
+    }
+}
+
+function adjustLayoutForScreenSize() {
+    const width = $(window).width();
+    
+    if (width < 480) {
+        // Extra small screens
+        $('.container').addClass('xs-screen');
+        $('.colour-btn').addClass('xs-size');
+    } else if (width < 768) {
+        // Small screens
+        $('.container').addClass('sm-screen');
+        $('.colour-btn').addClass('sm-size');
+    } else if (width < 1024) {
+        // Medium screens
+        $('.container').addClass('md-screen');
+        $('.colour-btn').addClass('md-size');
+    } else {
+        // Large screens
+        $('.container').removeClass('xs-screen sm-screen md-screen');
+        $('.colour-btn').removeClass('xs-size sm-size md-size');
+    }
+}
+
+function setupMobileInteractions() {
+    // Add touch-friendly button interactions
+    $('.colour-btn, .control-btn, .i2c-btn').on('touchstart', function() {
+        $(this).addClass('touch-active');
+    }).on('touchend touchcancel', function() {
+        $(this).removeClass('touch-active');
+    });
+    
+    // Optimize table for mobile
+    $('.firmware-table').addClass('mobile-table');
+}
 
 // LED Control Functions
 function setLED(colour) {
-    fetch('/led?colour=' + colour)
-        .then(response => response.text())
-        .then(data => {
+    $.get('/led?colour=' + colour)
+        .done(function(data) {
             console.log('LED set to:', colour);
             showNotification('LED set to ' + colour, 'success');
         })
-        .catch(error => {
+        .fail(function(error) {
             console.error('Error setting LED:', error);
             showNotification('Failed to set LED', 'error');
         });
@@ -30,14 +82,13 @@ function setLED(colour) {
 
 // I2C Command Functions
 function sendI2CCommand(command) {
-    fetch('/i2ccmd?cmd=' + command)
-        .then(response => response.text())
-        .then(data => {
+    $.get('/i2ccmd?cmd=' + command)
+        .done(function(data) {
             console.log('I2C command sent:', data);
             showNotification('I2C command sent: 0x' + command.toString(16), 'success');
             setTimeout(refreshLog, 500);
         })
-        .catch(error => {
+        .fail(function(error) {
             console.error('Error sending I2C command:', error);
             showNotification('Failed to send I2C command', 'error');
         });
@@ -48,16 +99,12 @@ function sendI2CCommand(command) {
 
 function refreshFirmwareTable() {
     console.log('Refreshing firmware table...');
-    fetch('/firmware/all')
-        .then(response => {
-            console.log('Response received:', response);
-            return response.text();
-        })
-        .then(data => {
+    $.get('/firmware/all')
+        .done(function(data) {
             console.log('Firmware data received:', data);
             populateFirmwareTable(data);
         })
-        .catch(error => {
+        .fail(function(error) {
             console.error('Error refreshing firmware table:', error);
             // Don't show notification for automatic refresh on page load
         });
@@ -65,11 +112,11 @@ function refreshFirmwareTable() {
 
 function populateFirmwareTable(firmwareData) {
     console.log('Populating firmware table with data:', firmwareData);
-    const tbody = document.getElementById('firmwareTableBody');
+    const $tbody = $('#firmwareTableBody');
     
     if (firmwareData.includes('No firmware packages found')) {
         console.log('No firmware packages found, showing empty table');
-        tbody.innerHTML = '<tr><td colspan="6">No firmware packages found</td></tr>';
+        $tbody.html('<tr><td colspan="6">No firmware packages found</td></tr>');
         return;
     }
     
@@ -83,7 +130,7 @@ function populateFirmwareTable(firmwareData) {
     }
     
     // Clear existing content
-    tbody.innerHTML = '';
+    $tbody.empty();
     
     packages.forEach((package, index) => {
         if (package.trim() === '') return;

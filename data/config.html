@@ -4,6 +4,7 @@
     <title>MQTT Configuration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -140,60 +141,61 @@
     
     <script>
         // Load current configuration when page loads
-        window.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             loadCurrentConfig();
         });
         
         function loadCurrentConfig() {
-            fetch('/api/config')
-                .then(response => response.json())
-                .then(config => {
-                    document.getElementById('brokerIP').value = config.brokerIP || '';
-                    document.getElementById('brokerPort').value = config.brokerPort || 1883;
-                    document.getElementById('username').value = config.username || '';
-                    document.getElementById('password').value = config.password || '';
-                    document.getElementById('deviceName').value = config.deviceName || 'ESP32_C3_Mini';
-                    document.getElementById('deviceId').value = config.deviceId || 'esp32_c3_mini_1';
-                    document.getElementById('mqttPrefix').value = config.mqttPrefix || 'homeassistant';
+            $.get('/api/config')
+                .done(function(config) {
+                    $('#brokerIP').val(config.brokerIP || '');
+                    $('#brokerPort').val(config.brokerPort || 1883);
+                    $('#username').val(config.username || '');
+                    $('#password').val(config.password || '');
+                    $('#deviceName').val(config.deviceName || 'ESP32_C3_Mini');
+                    $('#deviceId').val(config.deviceId || 'esp32_c3_mini_1');
+                    $('#mqttPrefix').val(config.mqttPrefix || 'homeassistant');
                 })
-                .catch(error => {
+                .fail(function(error) {
                     console.error('Error loading config:', error);
                 });
         }
         
-        document.getElementById('mqttForm').onsubmit = function(e) {
+        $('#mqttForm').on('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData();
-            formData.append('brokerIP', document.getElementById('brokerIP').value);
-            formData.append('brokerPort', document.getElementById('brokerPort').value);
-            formData.append('username', document.getElementById('username').value);
-            formData.append('password', document.getElementById('password').value);
-            formData.append('deviceName', document.getElementById('deviceName').value);
-            formData.append('deviceId', document.getElementById('deviceId').value);
-            formData.append('mqttPrefix', document.getElementById('mqttPrefix').value);
+            formData.append('brokerIP', $('#brokerIP').val());
+            formData.append('brokerPort', $('#brokerPort').val());
+            formData.append('username', $('#username').val());
+            formData.append('password', $('#password').val());
+            formData.append('deviceName', $('#deviceName').val());
+            formData.append('deviceId', $('#deviceId').val());
+            formData.append('mqttPrefix', $('#mqttPrefix').val());
             
-            fetch('/config', {
+            $.ajax({
+                url: '/config',
                 method: 'POST',
-                body: formData
+                data: formData,
+                processData: false,
+                contentType: false
             })
-            .then(response => response.text())
-            .then(data => {
-                const messageDiv = document.getElementById('message');
+            .done(function(data) {
+                const $messageDiv = $('#message');
                 if (data.includes('successfully')) {
-                    messageDiv.innerHTML = '<div class="success">' + data + '</div>';
+                    $messageDiv.html('<div class="success">' + data + '</div>');
                 } else {
-                    messageDiv.innerHTML = '<div class="error">' + data + '</div>';
+                    $messageDiv.html('<div class="error">' + data + '</div>');
                 }
                 
                 setTimeout(() => {
-                    messageDiv.innerHTML = '';
+                    $messageDiv.empty();
                 }, 5000);
             })
-            .catch(error => {
-                document.getElementById('message').innerHTML = '<div class="error">Error: ' + error + '</div>';
+            .fail(function(error) {
+                $('#message').html('<div class="error">Error: ' + error + '</div>');
             });
-        };
+        });
     </script>
 </body>
 </html>

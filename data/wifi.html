@@ -4,6 +4,7 @@
     <title>WiFi Configuration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -219,47 +220,44 @@
     
     <script>
         // Load current WiFi configuration when page loads
-        window.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             loadCurrentWiFi();
         });
         
         function loadCurrentWiFi() {
-            fetch('/api/wifi')
-                .then(response => response.json())
-                .then(wifi => {
+            $.get('/api/wifi')
+                .done(function(wifi) {
                     if (wifi.ssid && wifi.ssid.length > 0) {
-                        document.getElementById('currentSSID').textContent = wifi.ssid;
-                        document.getElementById('currentPassword').textContent = '••••••••';
-                        document.getElementById('currentWiFi').classList.remove('hidden');
+                        $('#currentSSID').text(wifi.ssid);
+                        $('#currentPassword').text('••••••••');
+                        $('#currentWiFi').removeClass('hidden');
                         
                         // Pre-fill the form with current values
-                        document.getElementById('ssid').value = wifi.ssid;
-                        document.getElementById('password').value = wifi.password;
+                        $('#ssid').val(wifi.ssid);
+                        $('#password').val(wifi.password);
                     } else {
-                        document.getElementById('currentWiFi').classList.add('hidden');
+                        $('#currentWiFi').addClass('hidden');
                     }
                 })
-                .catch(error => {
+                .fail(function(error) {
                     console.error('Error loading WiFi config:', error);
-                    document.getElementById('currentWiFi').classList.add('hidden');
+                    $('#currentWiFi').addClass('hidden');
                 });
         }
         
         function scanWiFi() {
-            const networkList = document.getElementById('networkList');
-            networkList.classList.remove('hidden');
-            networkList.innerHTML = '<div class="loading">Scanning for WiFi networks...</div>';
+            const $networkList = $('#networkList');
+            $networkList.removeClass('hidden').html('<div class="loading">Scanning for WiFi networks...</div>');
             
-            fetch('/api/wifi/scan')
-                .then(response => response.json())
-                .then(networks => {
+            $.get('/api/wifi/scan')
+                .done(function(networks) {
                     if (networks.error) {
-                        networkList.innerHTML = '<div class="error">Error: ' + networks.error + '</div>';
+                        $networkList.html('<div class="error">Error: ' + networks.error + '</div>');
                         return;
                     }
                     
                     if (networks.length === 0) {
-                        networkList.innerHTML = '<div class="loading">No WiFi networks found</div>';
+                        $networkList.html('<div class="loading">No WiFi networks found</div>');
                         return;
                     }
                     
@@ -279,17 +277,17 @@
                             </div>
                         `;
                     });
-                    networkList.innerHTML = html;
+                    $networkList.html(html);
                 })
-                .catch(error => {
+                .fail(function(error) {
                     console.error('Error scanning WiFi:', error);
-                    networkList.innerHTML = '<div class="error">Error scanning WiFi networks: ' + error + '</div>';
+                    $networkList.html('<div class="error">Error scanning WiFi networks: ' + error + '</div>');
                 });
         }
         
         function selectNetwork(ssid) {
-            document.getElementById('ssid').value = ssid;
-            document.getElementById('password').focus();
+            $('#ssid').val(ssid);
+            $('#password').focus();
         }
         
         function getSignalStrength(rssi) {

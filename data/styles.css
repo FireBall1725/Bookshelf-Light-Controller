@@ -461,6 +461,103 @@ h1 i {
     }
 }
 
+/* Enhanced Responsive Classes */
+.xs-screen .container {
+    padding: 15px;
+}
+
+.xs-screen h1 {
+    font-size: 1.8em;
+}
+
+.xs-screen .colour-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 0.7em;
+    margin: 4px;
+}
+
+.sm-screen .container {
+    padding: 20px;
+}
+
+.sm-screen h1 {
+    font-size: 2em;
+}
+
+.sm-screen .colour-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 0.8em;
+}
+
+.md-screen .container {
+    padding: 25px;
+}
+
+.md-screen h1 {
+    font-size: 2.2em;
+}
+
+/* Mobile Table Styles */
+.mobile-table {
+    font-size: 0.8em;
+}
+
+.mobile-table th,
+.mobile-table td {
+    padding: 8px 6px;
+}
+
+.mobile-table .action-btn {
+    padding: 4px 8px;
+    font-size: 0.7em;
+}
+
+/* Touch-friendly Interactions */
+.touch-active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease;
+}
+
+/* Enhanced Mobile Layouts */
+@media (max-width: 480px) {
+    .config-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .config-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .firmware-section {
+        padding: 15px;
+    }
+    
+    .firmware-management,
+    .firmware-upload,
+    .firmware-update {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .i2c-section {
+        padding: 15px;
+    }
+    
+    .i2c-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .i2c-btn {
+        padding: 12px;
+        font-size: 0.8em;
+    }
+}
+
 @media (max-width: 480px) {
     .container {
         padding: 15px;

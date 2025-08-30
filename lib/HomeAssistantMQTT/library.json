@@ -1,0 +1,24 @@
+{
+  "name": "HomeAssistantMQTT",
+  "version": "1.0.0",
+  "description": "Home Assistant MQTT integration for ESP32",
+  "keywords": "homeassistant, mqtt, esp32, arduino, automation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/HomeAssistantMQTT.git"
+  },
+  "authors": [
+    {
+      "name": "Adaléa Reed (FireBall1725)",
+      "email": "fireball@fireball1725.ca"
+    }
+  ],
+  "license": "MIT",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "dependencies": {
+    "AsyncMqttClient-esphome": "^2.1.0",
+    "ArduinoJson": "^6.21.0",
+    "ConfigManager": "^1.0.0"
+  }
+}

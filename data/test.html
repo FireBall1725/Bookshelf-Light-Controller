@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Test Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 ESP32 Modular Architecture Test</h1>
+        <div class="status connected">
+            <strong>Status:</strong> Local Development Mode
+        </div>
+        
+        <div class="info">
+            <h3>✅ Build Successful!</h3>
+            <p>The ESP32 project now uses a clean, modular architecture:</p>
+            <ul>
+                <li><strong>main.cpp</strong> - Simplified to ~200 lines</li>
+                <li><strong>Logger</strong> - Handles all system logging</li>
+                <li><strong>LEDController</strong> - Manages RGB LED operations</li>
+                <li><strong>I2CScanner</strong> - Handles I2C bus scanning</li>
+                <li><strong>FirmwareUpdater</strong> - ATtiny1616 firmware updates</li>
+            </ul>
+        </div>
+        
+        <div class="led-control">
+            <h3>🎨 LED Control Test</h3>
+            <p>These buttons will work when connected to the ESP32:</p>
+            <button class="colour-btn red">Red</button>
+            <button class="colour-btn green">Green</button>
+            <button class="colour-btn blue">Blue</button>
+            <button class="colour-btn off">Off</button>
+        </div>
+        
+        <div class="firmware-section">
+            <h3>📡 Firmware Update Test</h3>
+            <p>This section will work when connected to the ESP32:</p>
+            <div class="firmware-controls">
+                <button class="control-btn version">Check Version</button>
+                <button class="control-btn scan">Scan I2C</button>
+            </div>
+        </div>
+        
+        <div class="log-section">
+            <h3>📋 Log System Test</h3>
+            <p>This will show real-time logs when connected to the ESP32:</p>
+            <div class="log-controls">
+                <button class="control-btn">Refresh Log</button>
+                <button class="control-btn">Clear Log</button>
+            </div>
+            <div class="log-entries">
+                <div class="log-entry">[0s] Local development mode - no ESP32 connected</div>
+                <div class="log-entry">[0s] Open this file in your browser to test the UI</div>
+                <div class="log-entry">[0s] Connect ESP32 to see real-time data</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

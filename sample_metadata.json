@@ -1,0 +1,32 @@
+{
+  "firmware": {
+    "version": "1.0.1",
+    "description": "I2C Light Controller for ATtiny1616 with WS2812B LED"
+  },
+  "target": {
+    "board": "ATtiny1616",
+    "platform": "atmelmegaavr",
+    "framework": "arduino",
+    "upload_protocol": "serialupdi"
+  },
+  "features": [
+    "WS2812B LED control",
+    "Button input with mode cycling",
+    "I2C slave communication",
+    "EEPROM address persistence",
+    "Firmware update framework"
+  ],
+  "build_info": {
+    "timestamp": "2025-01-30T12:00:00.000000",
+    "platformio_version": "6.1.0",
+    "python_version": "3.11.0"
+  },
+  "files": {
+    "firmware_hex": {
+      "name": "firmware.hex",
+      "size_bytes": 16471,
+      "size_kb": 16.08,
+      "description": "Intel HEX firmware file for ATtiny1616"
+    }
+  }
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MQTT Configuration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 30px; 
+        }
+        .form-group { margin-bottom: 15px; }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            color: #34495e;
+        }
+        input[type="text"], input[type="number"], input[type="password"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button { 
+            background: linear-gradient(45deg, #007cba, #005a87); 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 124, 186, 0.4);
+        }
+        .success { 
+            color: #27ae60; 
+            margin-top: 15px; 
+            padding: 15px;
+            background: #d5f4e6;
+            border-radius: 8px;
+            border: 1px solid #27ae60;
+        }
+        .error { 
+            color: #e74c3c; 
+            margin-top: 15px; 
+            padding: 15px;
+            background: #fadbd8;
+            border-radius: 8px;
+            border: 1px solid #e74c3c;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .back-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link a:hover {
+            background: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MQTT Configuration</h1>
+        <form id="mqttForm">
+            <div class="form-group">
+                <label>MQTT Broker IP:</label>
+                <input type="text" id="brokerIP" required>
+            </div>
+            <div class="form-group">
+                <label>MQTT Broker Port:</label>
+                <input type="number" id="brokerPort" value="1883" required>
+            </div>
+            <div class="form-group">
+                <label>Username (optional):</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label>Password (optional):</label>
+                <input type="password" id="password">
+            </div>
+            <div class="form-group">
+                <label>Device Name:</label>
+                <input type="text" id="deviceName" required>
+            </div>
+            <div class="form-group">
+                <label>Device ID:</label>
+                <input type="text" id="deviceId" required>
+            </div>
+            <div class="form-group">
+                <label>MQTT Prefix:</label>
+                <input type="text" id="mqttPrefix" value="homeassistant" required>
+            </div>
+            <button type="submit">Save Configuration</button>
+        </form>
+        <div id="message"></div>
+        <div class="back-link">
+            <a href="/">← Back to Main Page</a>
+        </div>
+    </div>
+    
+    <script>
+        // Load current configuration when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCurrentConfig();
+        });
+        
+        function loadCurrentConfig() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(config => {
+                    document.getElementById('brokerIP').value = config.brokerIP || '';
+                    document.getElementById('brokerPort').value = config.brokerPort || 1883;
+                    document.getElementById('username').value = config.username || '';
+                    document.getElementById('password').value = config.password || '';
+                    document.getElementById('deviceName').value = config.deviceName || 'ESP32_C3_Mini';
+                    document.getElementById('deviceId').value = config.deviceId || 'esp32_c3_mini_1';
+                    document.getElementById('mqttPrefix').value = config.mqttPrefix || 'homeassistant';
+                })
+                .catch(error => {
+                    console.error('Error loading config:', error);
+                });
+        }
+        
+        document.getElementById('mqttForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('brokerIP', document.getElementById('brokerIP').value);
+            formData.append('brokerPort', document.getElementById('brokerPort').value);
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+            formData.append('deviceName', document.getElementById('deviceName').value);
+            formData.append('deviceId', document.getElementById('deviceId').value);
+            formData.append('mqttPrefix', document.getElementById('mqttPrefix').value);
+            
+            fetch('/config', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                if (data.includes('successfully')) {
+                    messageDiv.innerHTML = '<div class="success">' + data + '</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="error">' + data + '</div>';
+                }
+                
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 5000);
+            })
+            .catch(error => {
+                document.getElementById('message').innerHTML = '<div class="error">Error: ' + error + '</div>';
+            });
+        };
+    </script>
+</body>
+</html>

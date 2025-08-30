@@ -1,0 +1,464 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+h3 {
+    color: #34495e;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+}
+
+/* Status Section */
+.status {
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.connected {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+/* Configuration Section */
+.config-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.config-controls {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.config-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #007cba, #005a87);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 124, 186, 0.3);
+}
+
+.config-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 124, 186, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.config-btn.mqtt {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+
+.config-btn.wifi {
+    background: linear-gradient(45deg, #fd7e14, #e83e8c);
+}
+
+/* LED Control Section */
+.led-control {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.colour-btn {
+    width: 80px;
+    height: 80px;
+    margin: 8px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.colour-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.colour-btn:active {
+    transform: translateY(0);
+}
+
+.red { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+.green { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+.blue { background: linear-gradient(45deg, #3498db, #2980b9); }
+.yellow { background: linear-gradient(45deg, #f1c40f, #f39c12); }
+.purple { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+.cyan { background: linear-gradient(45deg, #00d2ff, #3a7bd5); }
+.white { background: linear-gradient(45deg, #ffffff, #f8f9fa); color: #333; }
+.off { background: linear-gradient(45deg, #6c757d, #495057); }
+
+/* Special Effects */
+.effect-btn {
+    padding: 12px 24px;
+    margin: 8px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: all 0.3s ease;
+    font-size: 1em;
+}
+
+.effect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.rainbow {
+    background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
+    background-size: 400% 400%;
+    animation: rainbow 3s ease-in-out infinite;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.blink { background: linear-gradient(45deg, #007bff, #0056b3); }
+.fade { background: linear-gradient(45deg, #28a745, #1e7e34); }
+
+/* I2C Section */
+.i2c-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 15px;
+    border: 1px solid #2196f3;
+}
+
+.i2c-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.i2c-btn {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.i2c-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.i2c-off { background: linear-gradient(45deg, #6c757d, #495057); }
+.i2c-red { background: linear-gradient(45deg, #dc3545, #c82333); }
+.i2c-green { background: linear-gradient(45deg, #28a745, #1e7e34); }
+.i2c-blue { background: linear-gradient(45deg, #007bff, #0056b3); }
+.i2c-purple { background: linear-gradient(45deg, #6f42c1, #5a2d91); }
+.i2c-hue { 
+    background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
+    background-size: 400% 400%;
+    animation: rainbow 4s ease-in-out infinite;
+}
+.i2c-nav { background: linear-gradient(45deg, #17a2b8, #138496); }
+
+/* Firmware Section */
+.firmware-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-radius: 15px;
+    border: 1px solid #ffc107;
+}
+
+.firmware-controls {
+    margin: 15px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.control-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.control-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.control-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.version { background: linear-gradient(45deg, #17a2b8, #138496); }
+.scan { background: linear-gradient(45deg, #6f42c1, #5a2d91); }
+.upload { background: linear-gradient(45deg, #28a745, #1e7e34); }
+.update { background: linear-gradient(45deg, #007bff, #0056b3); }
+.cancel { background: linear-gradient(45deg, #dc3545, #c82333); }
+
+.file-input {
+    margin: 20px 0;
+}
+
+.file-input input[type='file'] {
+    padding: 12px;
+    border: 2px dashed #ffc107;
+    border-radius: 10px;
+    background: #fff;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-input input[type='file']:hover {
+    border-color: #e0a800;
+    background: #fff8e1;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 25px;
+    background: #e9ecef;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.version-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e9ecef;
+    border-radius: 10px;
+    border-left: 4px solid #007bff;
+}
+
+.version-info strong {
+    color: #495057;
+    font-size: 1.1em;
+}
+
+.version-info span {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #6c757d;
+    display: block;
+    margin: 5px 0;
+}
+
+/* Device Info Section */
+.info {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 15px;
+    border: 1px solid #2196f3;
+}
+
+.info p {
+    margin: 10px 0;
+    font-size: 1em;
+}
+
+.info strong {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+/* Log Section */
+.log-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.log-controls {
+    margin: 15px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.log-controls .control-btn {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+}
+
+.log-entries {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+.log-entry {
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: white;
+    border-left: 3px solid #007bff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.log-entry:nth-child(even) {
+    background: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        margin: 10px;
+    }
+    
+    .container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .i2c-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .firmware-controls {
+        flex-direction: column;
+    }
+    
+    .log-controls {
+        flex-direction: column;
+    }
+    
+    .colour-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .colour-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 0.7em;
+    }
+}
+
+/* Firmware Management Sub-sections */
+.firmware-management, .firmware-upload, .firmware-update {
+    margin: 20px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.firmware-management h4, .firmware-upload h4, .firmware-update h4 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
+.firmware-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-top: 15px;
+    font-family: monospace;
+    white-space: pre-line;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.control-btn.info { background: linear-gradient(45deg, #17a2b8, #138496); }
+.control-btn.delete { background: linear-gradient(45deg, #dc3545, #c82333); }

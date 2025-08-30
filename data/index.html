@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 C3 Controller & Log Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 C3 Controller & Log Viewer</h1>
+        <div class="status connected">
+            <strong>Status:</strong> Connected to WiFi
+        </div>
+        
+        <!-- Configuration Section -->
+        <div class="config-section">
+            <h3>Configuration</h3>
+            <div class="config-controls">
+                <a href="/config" class="config-btn mqtt">MQTT Settings</a>
+                <a href="/wifi" class="config-btn wifi">WiFi Settings</a>
+            </div>
+        </div>
+        
+        <!-- LED Control Section -->
+        <div class="led-control">
+            <h3>LED Control</h3>
+            <button class="colour-btn red" onclick="setLED('red')">Red</button>
+            <button class="colour-btn green" onclick="setLED('green')">Green</button>
+            <button class="colour-btn blue" onclick="setLED('blue')">Blue</button>
+            <button class="colour-btn yellow" onclick="setLED('yellow')">Yellow</button>
+            <button class="colour-btn purple" onclick="setLED('purple')">Purple</button>
+            <button class="colour-btn cyan" onclick="setLED('cyan')">Cyan</button>
+            <button class="colour-btn white" onclick="setLED('white')">White</button>
+            <button class="colour-btn off" onclick="setLED('off')">Off</button>
+        </div>
+        
+        <!-- Special Effects Section -->
+        <div class="led-control">
+            <h3>Special Effects</h3>
+            <button onclick="setLED('rainbow')" class="effect-btn rainbow">Rainbow</button>
+            <button onclick="setLED('blink')" class="effect-btn blink">Blink</button>
+            <button onclick="setLED('fade')" class="effect-btn fade">Fade</button>
+        </div>
+        
+        <!-- I2C Commands Section -->
+        <div class="i2c-section">
+            <h3>I2C Commands to Address 0x50</h3>
+            <p>Send commands to I2C device at address 0x50:</p>
+            <div class="i2c-grid">
+                <button class="i2c-btn i2c-off" onclick="sendI2CCommand(0x00)">0x00 - Turn Off LED</button>
+                <button class="i2c-btn i2c-red" onclick="sendI2CCommand(0x01)">0x01 - Red Mode</button>
+                <button class="i2c-btn i2c-green" onclick="sendI2CCommand(0x02)">0x02 - Green Mode</button>
+                <button class="i2c-btn i2c-blue" onclick="sendI2CCommand(0x03)">0x03 - Blue Mode</button>
+                <button class="i2c-btn i2c-purple" onclick="sendI2CCommand(0x04)">0x04 - Purple Mode</button>
+                <button class="i2c-btn i2c-hue" onclick="sendI2CCommand(0x05)">0x05 - Hue Scrolling</button>
+                <button class="i2c-btn i2c-nav" onclick="sendI2CCommand(0x06)">0x06 - Next Mode</button>
+                <button class="i2c-btn i2c-nav" onclick="sendI2CCommand(0x07)">0x07 - Previous Mode</button>
+            </div>
+        </div>
+        
+        <!-- Firmware Update Section -->
+        <div class="firmware-section">
+            <h3>ATtiny1616 Firmware Update</h3>
+            <p>Upload a .hex file or .bin package to update the ATtiny1616 firmware over I2C:</p>
+            
+            <!-- Stored Firmware Management -->
+            <div class="firmware-management">
+                <h4>Stored Firmware</h4>
+                <div class="firmware-controls">
+                    <button onclick="listStoredFirmware()" class="control-btn info">List Stored</button>
+                    <button onclick="getFirmwareInfo()" class="control-btn info">Get Info</button>
+                    <button onclick="deleteStoredFirmware()" class="control-btn delete">Delete Stored</button>
+                </div>
+                <div id="storedFirmwareInfo" class="firmware-info"></div>
+            </div>
+            
+            <!-- Firmware Upload -->
+            <div class="firmware-upload">
+                <h4>Upload New Firmware</h4>
+                            <div class="file-input">
+                <input type="file" id="firmwareFile" accept=".hex,.bin" onchange="handleFileSelect(this)">
+            </div>
+                <div class="firmware-controls">
+                    <button id="uploadBtn" onclick="uploadFirmware()" disabled class="control-btn upload">Upload to SPIFFS</button>
+                </div>
+            </div>
+            
+            <!-- Firmware Update -->
+            <div class="firmware-update">
+                <h4>Update ATtiny</h4>
+                <div class="firmware-controls">
+                    <button onclick="checkVersion()" class="control-btn version">Check Current Version</button>
+                    <button onclick="scanI2C()" class="control-btn scan">Scan I2C Bus</button>
+                    <button id="updateBtn" onclick="startFirmwareUpdate()" disabled class="control-btn update">Start Update</button>
+                    <button onclick="cancelUpdate()" class="control-btn cancel">Cancel Update</button>
+                </div>
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+                <div id="firmwareStatus">No firmware file selected</div>
+                <div id="versionInfo" class="version-info" style="display: none;">
+                    <strong>Version Info:</strong><br>
+                    <span id="currentVersion">Unknown</span><br>
+                    <span id="newVersion">Unknown</span><br>
+                    <span id="buildDate">Unknown</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Device Info Section -->
+        <div class="info">
+            <h3>Device Info</h3>
+            <p><strong>Chip:</strong> ESP32-C3</p>
+            <p><strong>MAC Address:</strong> <span id="macAddress">Loading...</span></p>
+            <p><strong>IP Address:</strong> <span id="ipAddress">Loading...</span></p>
+            <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
+            <p><strong>WiFi RSSI:</strong> <span id="rssi">Loading...</span></p>
+            <p><strong>I2C Pins:</strong> SDA:GPIO6, SCL:GPIO7</p>
+        </div>
+        
+        <!-- System Log Section -->
+        <div class="log-section">
+            <h3>System Log</h3>
+            <div class="log-controls">
+                <button onclick="refreshLog()" class="control-btn">Refresh Log</button>
+                <button onclick="clearLog()" class="control-btn">Clear Log</button>
+                <button onclick="scanI2C()" class="control-btn">Scan I2C</button>
+                <button onclick="autoRefresh()" class="control-btn">Auto-refresh: <span id="autoRefreshStatus">OFF</span></button>
+            </div>
+            <div id="logEntries" class="log-entries">Loading log...</div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -81,9 +81,11 @@ function populateFirmwareTable(firmwareData) {
         // Single package case - wrap in array
         packages = [firmwareData];
     }
-    let tableHTML = '';
     
-    packages.forEach(package => {
+    // Clear existing content
+    tbody.innerHTML = '';
+    
+    packages.forEach((package, index) => {
         if (package.trim() === '') return;
         
         const lines = package.trim().split('\n');
@@ -118,22 +120,35 @@ function populateFirmwareTable(firmwareData) {
             }
         }
         
-        tableHTML += `
-            <tr>
-                <td>${filename}</td>
-                <td>${displaySize}</td>
-                <td>${version}</td>
-                <td>${board}</td>
-                <td>${buildDate}</td>
-                <td>
-                    <button class="action-btn info" onclick="getFirmwareInfo('${filename}')" title="Get Info">ℹ️</button>
-                    <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete">🗑️</button>
-                </td>
-            </tr>
+        // Create main row
+        const mainRow = document.createElement('tr');
+        mainRow.innerHTML = `
+            <td>${filename}</td>
+            <td>${displaySize}</td>
+            <td>${version}</td>
+            <td>${board}</td>
+            <td>${buildDate}</td>
+            <td>
+                <button class="action-btn info" onclick="toggleFirmwareInfo('${filename}', ${index})" title="Toggle Info">ℹ️</button>
+                <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete">🗑️</button>
+            </td>
         `;
+        tbody.appendChild(mainRow);
+        
+        // Create expandable row (initially hidden)
+        const expandableRow = document.createElement('tr');
+        expandableRow.className = 'expandable-row';
+        expandableRow.id = `expandable-${index}`;
+        expandableRow.style.display = 'none';
+        expandableRow.innerHTML = `
+            <td colspan="6">
+                <div class="firmware-features">
+                    <div class="firmware-feature">Loading features...</div>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(expandableRow);
     });
-    
-    tbody.innerHTML = tableHTML;
 }
 
 function deleteFirmware(filename) {
@@ -151,29 +166,51 @@ function deleteFirmware(filename) {
     }
 }
 
-function getFirmwareInfo(filename) {
+function toggleFirmwareInfo(filename, index) {
+    const expandableRow = document.getElementById(`expandable-${index}`);
+    const isVisible = expandableRow.style.display !== 'none';
+    
+    if (isVisible) {
+        // Hide the row
+        expandableRow.style.display = 'none';
+    } else {
+        // Show the row and load real metadata from the .bin file
+        expandableRow.style.display = 'table-row';
+        loadFirmwareMetadata(filename, index);
+    }
+}
+
+function loadFirmwareMetadata(filename, index) {
+    const expandableRow = document.getElementById(`expandable-${index}`);
+    const featuresContainer = expandableRow.querySelector('.firmware-features');
+    
+    // Show loading state
+    featuresContainer.innerHTML = '<div class="firmware-feature">Loading features...</div>';
+    
+    // Fetch the actual firmware package info to get real metadata
     fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
         .then(response => response.text())
         .then(data => {
-            // Parse the firmware info and extract features
-            const features = extractFeaturesFromInfo(data);
-            displayFirmwareDetails(features);
+            // Parse the real metadata from the .bin file
+            const features = parseRealFirmwareMetadata(data, filename);
+            displayFirmwareFeatures(features, featuresContainer);
         })
         .catch(error => {
-            console.error('Error getting firmware info:', error);
-            showNotification('Failed to get firmware info', 'error');
+            console.error('Error loading firmware metadata:', error);
+            featuresContainer.innerHTML = '<div class="firmware-feature error">Failed to load features</div>';
         });
 }
 
-function extractFeaturesFromInfo(infoText) {
+function parseRealFirmwareMetadata(infoText, filename) {
     const features = [];
     const lines = infoText.split('\n');
     
-    // Extract key information from the firmware info
+    // Extract key information from the actual firmware package
     let version = 'Unknown';
     let description = 'Unknown';
     let board = 'Unknown';
     let buildDate = 'Unknown';
+    let packageType = 'Unknown';
     
     lines.forEach(line => {
         if (line.startsWith('Version:')) {
@@ -184,16 +221,22 @@ function extractFeaturesFromInfo(infoText) {
             board = line.split('Board:')[1].trim();
         } else if (line.startsWith('Build Date:')) {
             buildDate = line.split('Build Date:')[1].trim();
+        } else if (line.startsWith('Type:')) {
+            packageType = line.split('Type:')[1].trim();
         }
     });
     
-    // Create feature list based on available information
+    // Add real metadata from the .bin file
     if (version !== 'Unknown') features.push(`Version: ${version}`);
     if (description !== 'Unknown') features.push(`Description: ${description}`);
     if (board !== 'Unknown') features.push(`Board: ${board}`);
     if (buildDate !== 'Unknown') features.push(`Build Date: ${buildDate}`);
+    if (packageType !== 'Unknown') features.push(`Package Type: ${packageType}`);
     
-    // Add some additional context
+    // Add filename info
+    features.push(`Filename: ${filename}`);
+    
+    // Add technical details based on the actual firmware
     features.push('Intel HEX firmware file for ATtiny1616');
     features.push('I2C slave communication');
     features.push('EEPROM address persistence');
@@ -202,26 +245,17 @@ function extractFeaturesFromInfo(infoText) {
     return features;
 }
 
-function displayFirmwareDetails(features) {
-    const detailsSection = document.getElementById('firmwareDetails');
-    const featuresContainer = document.getElementById('firmwareFeatures');
-    
+function displayFirmwareFeatures(features, container) {
     // Clear previous features
-    featuresContainer.innerHTML = '';
+    container.innerHTML = '';
     
     // Add each feature
     features.forEach(feature => {
         const featureElement = document.createElement('div');
         featureElement.className = 'firmware-feature';
         featureElement.textContent = feature;
-        featuresContainer.appendChild(featureElement);
+        container.appendChild(featureElement);
     });
-    
-    // Show the details section
-    detailsSection.style.display = 'block';
-    
-    // Scroll to the details section
-    detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Firmware Update Functions

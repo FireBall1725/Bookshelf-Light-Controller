@@ -363,21 +363,15 @@ h3 {
     background: #f8f9fa;
 }
 
-/* Firmware Details Section */
-.firmware-details {
-    margin-top: 20px;
-    padding: 20px;
+/* Expandable Table Rows */
+.firmware-table tr.expandable-row {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 15px;
-    border: 1px solid #dee2e6;
-    animation: slideDown 0.3s ease-out;
+    border-left: 4px solid #007bff;
 }
 
-.firmware-details h5 {
-    color: #495057;
-    margin: 0 0 15px 0;
-    font-size: 1.1em;
-    font-weight: 600;
+.firmware-table tr.expandable-row td {
+    padding: 15px;
+    border-top: none;
 }
 
 .firmware-features {

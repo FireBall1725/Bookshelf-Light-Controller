@@ -32,6 +32,22 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        .current-wifi {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .current-wifi h3 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        .current-wifi p {
+            margin: 5px 0;
+            font-family: monospace;
+        }
         .form-group { margin-bottom: 15px; }
         label { 
             display: block; 
@@ -61,10 +77,18 @@
             font-size: 16px;
             font-weight: bold;
             transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
         button:hover { 
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(253, 126, 20, 0.4);
+        }
+        .scan-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+        .scan-btn:hover {
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
         }
         .success { 
             color: #27ae60; 
@@ -99,26 +123,94 @@
             background: #3498db;
             color: white;
         }
+        .network-list {
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .network-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .network-item:hover {
+            background-color: #e9ecef;
+        }
+        .network-item:last-child {
+            border-bottom: none;
+        }
+        .network-ssid {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .network-details {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .network-signal {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        .network-encryption {
+            display: inline-block;
+        }
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>WiFi Configuration</h1>
+        
         <div class="warning">
             <strong>⚠️ Warning:</strong> Changing WiFi credentials will restart the device and may disconnect you temporarily.
         </div>
+        
+        <div id="currentWiFi" class="current-wifi hidden">
+            <h3>Current WiFi Configuration</h3>
+            <p><strong>SSID:</strong> <span id="currentSSID">Loading...</span></p>
+            <p><strong>Password:</strong> <span id="currentPassword">Loading...</span></p>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button type="button" class="scan-btn" onclick="scanWiFi()">
+                🔍 Scan for WiFi Networks
+            </button>
+            <button type="button" onclick="loadCurrentWiFi()">
+                🔄 Refresh Current Settings
+            </button>
+        </div>
+        
+        <div id="networkList" class="network-list hidden">
+            <div class="loading">Scanning for WiFi networks...</div>
+        </div>
+        
         <form id="wifiForm">
             <div class="form-group">
                 <label>WiFi SSID:</label>
-                <input type="text" id="ssid" required>
+                <input type="text" id="ssid" required placeholder="Enter WiFi network name">
             </div>
             <div class="form-group">
                 <label>WiFi Password:</label>
-                <input type="password" id="password" required>
+                <input type="password" id="password" required placeholder="Enter WiFi password">
             </div>
             <button type="submit">Update WiFi</button>
         </form>
+        
         <div id="message"></div>
+        
         <div class="back-link">
             <a href="/">← Back to Main Page</a>
         </div>
@@ -134,12 +226,77 @@
             fetch('/api/wifi')
                 .then(response => response.json())
                 .then(wifi => {
-                    document.getElementById('ssid').value = wifi.ssid || '';
-                    document.getElementById('password').value = wifi.password || '';
+                    if (wifi.ssid && wifi.ssid.length > 0) {
+                        document.getElementById('currentSSID').textContent = wifi.ssid;
+                        document.getElementById('currentPassword').textContent = '••••••••';
+                        document.getElementById('currentWiFi').classList.remove('hidden');
+                        
+                        // Pre-fill the form with current values
+                        document.getElementById('ssid').value = wifi.ssid;
+                        document.getElementById('password').value = wifi.password;
+                    } else {
+                        document.getElementById('currentWiFi').classList.add('hidden');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading WiFi config:', error);
+                    document.getElementById('currentWiFi').classList.add('hidden');
                 });
+        }
+        
+        function scanWiFi() {
+            const networkList = document.getElementById('networkList');
+            networkList.classList.remove('hidden');
+            networkList.innerHTML = '<div class="loading">Scanning for WiFi networks...</div>';
+            
+            fetch('/api/wifi/scan')
+                .then(response => response.json())
+                .then(networks => {
+                    if (networks.error) {
+                        networkList.innerHTML = '<div class="error">Error: ' + networks.error + '</div>';
+                        return;
+                    }
+                    
+                    if (networks.length === 0) {
+                        networkList.innerHTML = '<div class="loading">No WiFi networks found</div>';
+                        return;
+                    }
+                    
+                    // Sort networks by signal strength (RSSI)
+                    networks.sort((a, b) => b.rssi - a.rssi);
+                    
+                    let html = '';
+                    networks.forEach(network => {
+                        const signalStrength = getSignalStrength(network.rssi);
+                        html += `
+                            <div class="network-item" onclick="selectNetwork('${network.ssid}')">
+                                <div class="network-ssid">${network.ssid}</div>
+                                <div class="network-details">
+                                    <span class="network-signal">${signalStrength} (${network.rssi} dBm)</span>
+                                    <span class="network-encryption">${network.encryption}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    networkList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error scanning WiFi:', error);
+                    networkList.innerHTML = '<div class="error">Error scanning WiFi networks: ' + error + '</div>';
+                });
+        }
+        
+        function selectNetwork(ssid) {
+            document.getElementById('ssid').value = ssid;
+            document.getElementById('password').focus();
+        }
+        
+        function getSignalStrength(rssi) {
+            if (rssi >= -50) return '🔴 Excellent';
+            if (rssi >= -60) return '🟠 Very Good';
+            if (rssi >= -70) return '🟡 Good';
+            if (rssi >= -80) return '🟢 Fair';
+            return '🔵 Poor';
         }
         
         document.getElementById('wifiForm').onsubmit = function(e) {

@@ -53,6 +53,7 @@ public:
     // API endpoints for configuration
     static void handleAPIConfig();
     static void handleAPIWiFi();
+    static void handleWiFiScan();
 
 private:
     static WebServer* webServer;
@@ -60,6 +61,7 @@ private:
     static String getMACAddress();
     static String getIPAddress();
     static int getWiFiRSSI();
+    static String getEncryptionType(wifi_auth_mode_t encryptionType);
 };
 
 #endif

@@ -52,6 +52,7 @@ void WebHandler::setupRoutes() {
     // API endpoints for configuration
     webServer->on("/api/config", HTTP_GET, handleAPIConfig);
     webServer->on("/api/wifi", HTTP_GET, handleAPIWiFi);
+    webServer->on("/api/wifi/scan", HTTP_GET, handleWiFiScan);
 }
 
 // Static file handlers
@@ -386,6 +387,28 @@ void WebHandler::handleAPIWiFi() {
     webServer->send(200, "application/json", json);
 }
 
+void WebHandler::handleWiFiScan() {
+    int numNetworks = WiFi.scanNetworks();
+    
+    if (numNetworks == -1) {
+        webServer->send(500, "application/json", "{\"error\":\"WiFi scan failed\"}");
+        return;
+    }
+    
+    String json = "[";
+    for (int i = 0; i < numNetworks; i++) {
+        if (i > 0) json += ",";
+        json += "{";
+        json += "\"ssid\":\"" + WiFi.SSID(i) + "\",";
+        json += "\"rssi\":" + String(WiFi.RSSI(i)) + ",";
+        json += "\"encryption\":\"" + getEncryptionType(WiFi.encryptionType(i)) + "\"";
+        json += "}";
+    }
+    json += "]";
+    
+    webServer->send(200, "application/json", json);
+}
+
 // Private helper methods
 String WebHandler::getUptimeString() {
     unsigned long uptime = millis();
@@ -416,6 +439,29 @@ String WebHandler::getIPAddress() {
 
 int WebHandler::getWiFiRSSI() {
     return WiFi.RSSI();
+}
+
+String WebHandler::getEncryptionType(wifi_auth_mode_t encryptionType) {
+    switch (encryptionType) {
+        case WIFI_AUTH_OPEN:
+            return "Open";
+        case WIFI_AUTH_WEP:
+            return "WEP";
+        case WIFI_AUTH_WPA_PSK:
+            return "WPA-PSK";
+        case WIFI_AUTH_WPA2_PSK:
+            return "WPA2-PSK";
+        case WIFI_AUTH_WPA_WPA2_PSK:
+            return "WPA/WPA2-PSK";
+        case WIFI_AUTH_WPA2_ENTERPRISE:
+            return "WPA2-Enterprise";
+        case WIFI_AUTH_WPA3_PSK:
+            return "WPA3-PSK";
+        case WIFI_AUTH_WPA2_WPA3_PSK:
+            return "WPA2/WPA3-PSK";
+        default:
+            return "Unknown";
+    }
 }
 
 // Firmware package management endpoints

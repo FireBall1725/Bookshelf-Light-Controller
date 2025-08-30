@@ -498,7 +498,8 @@ bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t p
     
     // Parse metadata to get version and board
     String version, description, buildDate, board;
-    if (!parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
+    String features;
+    if (!parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board, features)) {
         Logger::addEntry("Failed to parse metadata from package");
         return false;
     }
@@ -699,7 +700,7 @@ bool FirmwareUpdater::parseFirmwareMetadata(const String& metadataPath, String& 
     return true;
 }
 
-bool FirmwareUpdater::parseFirmwareMetadataFromString(const String& metadataJson, String& version, String& description, String& buildDate, String& board) {
+bool FirmwareUpdater::parseFirmwareMetadataFromString(const String& metadataJson, String& version, String& description, String& buildDate, String& board, String& features) {
     DynamicJsonDocument doc(2048);
     DeserializationError error = deserializeJson(doc, metadataJson);
     
@@ -738,6 +739,18 @@ bool FirmwareUpdater::parseFirmwareMetadataFromString(const String& metadataJson
         }
     } else {
         buildDate = "Unknown";
+    }
+    
+    // Extract features array
+    features = "";
+    if (doc.containsKey("features") && doc["features"].is<JsonArray>()) {
+        JsonArray featuresArray = doc["features"];
+        for (JsonVariant feature : featuresArray) {
+            if (features.length() > 0) {
+                features += ",";
+            }
+            features += feature.as<String>();
+        }
     }
     
     return true;
@@ -787,12 +800,15 @@ String FirmwareUpdater::getFirmwarePackageInfo(const String& filename) {
                     packageFile.close();
                     
                     // Parse metadata
-                    String version, description, buildDate, board;
-                    if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
+                    String version, description, buildDate, board, features;
+                    if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board, features)) {
                         info += "Version: " + version + "\n";
                         info += "Description: " + description + "\n";
                         info += "Build Date: " + buildDate + "\n";
                         info += "Board: " + board + "\n";
+                        if (features.length() > 0) {
+                            info += "Features: " + features + "\n";
+                        }
                     }
                 }
             }
@@ -943,12 +959,15 @@ String FirmwareUpdater::getAllFirmwareInfo() {
                             packageFile.close();
                             
                             // Parse metadata
-                            String version, description, buildDate, board;
-                            if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
+                            String version, description, buildDate, board, features;
+                            if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board, features)) {
                                 info += "Version: " + version + "\n";
                                 info += "Description: " + description + "\n";
                                 info += "Build Date: " + buildDate + "\n";
                                 info += "Board: " + board + "\n";
+                                if (features.length() > 0) {
+                                    info += "Features: " + features + "\n";
+                                }
                             }
                         }
                     }

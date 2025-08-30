@@ -207,10 +207,13 @@ function parseRealFirmwareMetadata(infoText, filename) {
     
     // Extract key information from the actual firmware package
     let description = 'Unknown';
+    let featuresList = 'Unknown';
     
     lines.forEach(line => {
         if (line.startsWith('Description:')) {
             description = line.split('Description:')[1].trim();
+        } else if (line.startsWith('Features:')) {
+            featuresList = line.split('Features:')[1].trim();
         }
     });
     
@@ -221,11 +224,21 @@ function parseRealFirmwareMetadata(infoText, filename) {
     
     // Add firmware features section
     features.push('Firmware Features:');
-    features.push('• WS2812B LED control');
-    features.push('• Button input with mode cycling');
-    features.push('• I2C slave communication');
-    features.push('• EEPROM address persistence');
-    features.push('• Firmware update framework');
+    
+    if (featuresList !== 'Unknown') {
+        // Parse the comma-separated features from the backend
+        const featureArray = featuresList.split(',');
+        featureArray.forEach(feature => {
+            features.push('• ' + feature.trim());
+        });
+    } else {
+        // Fallback to default features if none provided
+        features.push('• WS2812B LED control');
+        features.push('• Button input with mode cycling');
+        features.push('• I2C slave communication');
+        features.push('• EEPROM address persistence');
+        features.push('• Firmware update framework');
+    }
     
     return features;
 }

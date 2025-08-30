@@ -552,6 +552,10 @@ h3 {
     margin: 2px;
 }
 
+.firmware-table .action-btn i {
+    font-size: 0.9em;
+}
+
 .firmware-table .action-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);

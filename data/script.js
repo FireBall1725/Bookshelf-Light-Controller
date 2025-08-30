@@ -129,8 +129,8 @@ function populateFirmwareTable(firmwareData) {
             <td>${board}</td>
             <td>${buildDate}</td>
             <td>
-                <button class="action-btn info" onclick="toggleFirmwareInfo('${filename}', ${index})" title="Toggle Info">ℹ️</button>
-                <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete">🗑️</button>
+                <button class="action-btn info" onclick="toggleFirmwareInfo('${filename}', ${index})" title="Toggle Info"><i class="fas fa-info-circle"></i></button>
+                <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(mainRow);

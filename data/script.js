@@ -176,8 +176,7 @@ function handleFileSelect(input) {
         document.getElementById('uploadBtn').disabled = false;
         document.getElementById('updateBtn').disabled = true;
         
-        // Hide version info when new file is selected
-        document.getElementById('versionInfo').style.display = 'none';
+        // Note: versionInfo element was removed, no need to hide it
         
         showNotification(fileType + ' selected: ' + file.name, 'info');
     } else {

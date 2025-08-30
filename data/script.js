@@ -49,7 +49,10 @@ function sendI2CCommand(command) {
 function refreshFirmwareTable() {
     console.log('Refreshing firmware table...');
     fetch('/firmware/all')
-        .then(response => response.text())
+        .then(response => {
+            console.log('Response received:', response);
+            return response.text();
+        })
         .then(data => {
             console.log('Firmware data received:', data);
             populateFirmwareTable(data);
@@ -229,6 +232,7 @@ function uploadFirmware() {
             updateBtn.disabled = false;
             
             // Auto-refresh the firmware table to show the new upload
+            console.log('Upload successful, calling refreshFirmwareTable()...');
             refreshFirmwareTable();
             
             showNotification('Firmware uploaded to SPIFFS successfully!', 'success');
@@ -390,25 +394,30 @@ function autoRefresh() {
 
 // Periodic Updates
 function startPeriodicUpdates() {
-    // Update uptime every second
+    // Update device info every second using the /uptime endpoint
     setInterval(function() {
         fetch('/uptime')
-            .then(response => response.text())
+            .then(response => response.json())
             .then(data => {
-                document.getElementById('uptime').textContent = data;
+                // Update uptime
+                if (document.getElementById('uptime')) {
+                    document.getElementById('uptime').textContent = data.uptime;
+                }
+                // Update MAC address
+                if (document.getElementById('macAddress')) {
+                    document.getElementById('macAddress').textContent = data.mac;
+                }
+                // Update IP address
+                if (document.getElementById('ipAddress')) {
+                    document.getElementById('ipAddress').textContent = data.ip;
+                }
+                // Update RSSI
+                if (document.getElementById('rssi')) {
+                    document.getElementById('rssi').textContent = data.rssi + ' dBm';
+                }
             })
-            .catch(error => console.error('Error updating uptime:', error));
+            .catch(error => console.error('Error updating device info:', error));
     }, 1000);
-    
-    // Update RSSI every 5 seconds
-    setInterval(function() {
-        fetch('/rssi')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('rssi').textContent = data;
-            })
-            .catch(error => console.error('Error updating RSSI:', error));
-    }, 5000);
 }
 
 // Utility Functions

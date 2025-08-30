@@ -462,10 +462,46 @@ bool FirmwareUpdater::isValidHexLine(const String& hexLine) {
 
 // New methods for .bin package handling
 bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t packageSize, const String& filename) {
-    String filepath = getFirmwarePath(filename);
+    // First, extract metadata to get version and board info for proper naming
+    // We'll create a temporary file to parse the metadata
+    String tempPath = "/temp_metadata.bin";
+    File tempFile = SPIFFS.open(tempPath, "w");
+    if (!tempFile) {
+        Logger::addEntry("Failed to create temporary metadata file");
+        return false;
+    }
     
+    size_t bytesWritten = tempFile.write(packageData, packageSize);
+    tempFile.close();
+    
+    if (bytesWritten != packageSize) {
+        Logger::addEntry("Failed to write temporary metadata file");
+        SPIFFS.remove(tempPath);
+        return false;
+    }
+    
+    // Parse metadata to get version and board
+    String version, description, buildDate, board;
+    if (!parseFirmwareMetadata(tempPath, version, description, buildDate, board)) {
+        Logger::addEntry("Failed to parse metadata from package");
+        SPIFFS.remove(tempPath);
+        return false;
+    }
+    
+    // Generate proper filename
+    String properFilename = generateFirmwareFilename(version, board);
+    String filepath = getFirmwarePath(properFilename);
+    
+    Logger::addEntry("Generated filename: " + properFilename);
     Logger::addEntry("Attempting to create firmware package: " + filepath);
     Logger::addEntry("Package size: " + String(packageSize) + " bytes");
+    
+    // Check for duplicates
+    if (checkDuplicateFirmware(version, board)) {
+        Logger::addEntry("Duplicate firmware detected: " + properFilename);
+        SPIFFS.remove(tempPath);
+        return false;
+    }
     
     // Try to remove any existing package first
     if (SPIFFS.exists(filepath)) {
@@ -476,19 +512,24 @@ bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t p
     File file = SPIFFS.open(filepath, "w");
     if (!file) {
         Logger::addEntry("Failed to create firmware package file: " + filepath);
+        SPIFFS.remove(tempPath);
         return false;
     }
     
-    size_t bytesWritten = file.write(packageData, packageSize);
+    bytesWritten = file.write(packageData, packageSize);
     file.close();
     
     if (bytesWritten != packageSize) {
         Logger::addEntry("Failed to write package data. Expected: " + String(packageSize) + ", Written: " + String(bytesWritten));
         SPIFFS.remove(filepath); // Clean up partial file
+        SPIFFS.remove(tempPath);
         return false;
     }
     
-    Logger::addEntry("Firmware package uploaded to SPIFFS: " + filename + " (" + String(packageSize) + " bytes)");
+    Logger::addEntry("Firmware package uploaded to SPIFFS: " + properFilename + " (" + String(packageSize) + " bytes)");
+    
+    // Clean up temporary file
+    SPIFFS.remove(tempPath);
     
     // Extract the package contents
     return extractFirmwarePackage(filepath);

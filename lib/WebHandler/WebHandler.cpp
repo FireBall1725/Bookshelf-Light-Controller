@@ -166,8 +166,8 @@ void WebHandler::handleFirmwareUpload() {
     if (upload.status == UPLOAD_FILE_START) {
         Logger::addEntry("Firmware upload started: " + upload.filename);
         
-        // Create a temporary file in SPIFFS
-        String tempPath = "/temp_" + upload.filename;
+        // Create a temporary file in SPIFFS with a simple name
+        String tempPath = "/temp_upload.bin";
         File tempFile = SPIFFS.open(tempPath, "w");
         if (!tempFile) {
             Logger::addEntry("Failed to create temporary file: " + tempPath);
@@ -178,7 +178,7 @@ void WebHandler::handleFirmwareUpload() {
         
     } else if (upload.status == UPLOAD_FILE_WRITE) {
         // Write chunk to temporary file
-        String tempPath = "/temp_" + upload.filename;
+        String tempPath = "/temp_upload.bin";
         File tempFile = SPIFFS.open(tempPath, "a");
         if (tempFile) {
             size_t bytesWritten = tempFile.write(upload.buf, upload.currentSize);
@@ -199,7 +199,7 @@ void WebHandler::handleFirmwareUpload() {
         Logger::addEntry("Firmware upload completed, size: " + String(upload.totalSize) + " bytes");
         
         // Read the complete file from SPIFFS
-        String tempPath = "/temp_" + upload.filename;
+        String tempPath = "/temp_upload.bin";
         if (!SPIFFS.exists(tempPath)) {
             Logger::addEntry("Temporary file not found: " + tempPath);
             webServer->send(400, "text/plain", "Upload failed - temporary file not found");

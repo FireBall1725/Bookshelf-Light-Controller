@@ -1,4 +1,5 @@
 // Global variables
+console.log('Script.js loaded successfully!');
 let autoRefreshInterval = null;
 let selectedFile = null;
 let firmwareData = null;
@@ -6,7 +7,6 @@ let firmwareData = null;
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     refreshLog();
-    refreshDeviceInfo();
     // Add a small delay to ensure everything is ready before loading firmware table
     setTimeout(() => {
         refreshFirmwareTable(); // Load firmware table on page load

@@ -244,33 +244,16 @@ void WebHandler::handleFirmwareUpload() {
         }
         Logger::addEntry(debugBytes);
         
-        // Determine if this is a .bin package or .hex file
+        // Handle as firmware package (.bin file)
         String filename = upload.filename;
-        bool isPackage = filename.endsWith(".bin");
-        
-        bool success = false;
-        if (isPackage) {
-            // Handle as firmware package (.bin file)
-            Logger::addEntry("Processing firmware package: " + filename);
-            success = FirmwareUpdater::uploadFirmwarePackage(firmwareBytes, fileSize, filename);
-            if (success) {
-                Logger::addEntry("Firmware package uploaded and extracted successfully: " + String(fileSize) + " bytes");
-                webServer->send(200, "text/plain", "Firmware package uploaded and extracted successfully! Size: " + String(fileSize) + " bytes");
-            } else {
-                Logger::addEntry("Failed to upload firmware package");
-                webServer->send(400, "text/plain", "Failed to upload firmware package");
-            }
+        Logger::addEntry("Processing firmware package: " + filename);
+        bool success = FirmwareUpdater::uploadFirmwarePackage(firmwareBytes, fileSize, filename);
+        if (success) {
+            Logger::addEntry("Firmware package uploaded and extracted successfully: " + String(fileSize) + " bytes");
+            webServer->send(200, "text/plain", "Firmware package uploaded and extracted successfully! Size: " + String(fileSize) + " bytes");
         } else {
-            // Handle as legacy .hex file
-            Logger::addEntry("Processing legacy hex file: " + filename);
-            success = FirmwareUpdater::uploadFirmwareToSPIFFS(firmwareBytes, fileSize, "attiny_firmware.hex");
-            if (success) {
-                Logger::addEntry("Firmware uploaded to SPIFFS successfully: " + String(fileSize) + " bytes");
-                webServer->send(200, "text/plain", "Firmware uploaded to SPIFFS successfully! Size: " + String(fileSize) + " bytes");
-            } else {
-                Logger::addEntry("Failed to upload firmware to SPIFFS");
-                webServer->send(400, "text/plain", "Failed to upload firmware to SPIFFS");
-            }
+            Logger::addEntry("Failed to upload firmware package");
+            webServer->send(400, "text/plain", "Failed to upload firmware package");
         }
         
         delete[] firmwareBytes; // Clean up memory

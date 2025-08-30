@@ -207,25 +207,25 @@ function parseRealFirmwareMetadata(infoText, filename) {
     
     // Extract key information from the actual firmware package
     let description = 'Unknown';
-    let packageType = 'Unknown';
     
     lines.forEach(line => {
         if (line.startsWith('Description:')) {
             description = line.split('Description:')[1].trim();
-        } else if (line.startsWith('Type:')) {
-            packageType = line.split('Type:')[1].trim();
         }
     });
     
-    // Only show info that's not already in the table
-    if (description !== 'Unknown') features.push(description);
-    if (packageType !== 'Unknown') features.push(packageType);
+    // Add description with proper format
+    if (description !== 'Unknown') {
+        features.push(`Description: ${description}`);
+    }
     
-    // Add technical details
-    features.push('Intel HEX firmware file for ATtiny1616');
-    features.push('I2C slave communication');
-    features.push('EEPROM address persistence');
-    features.push('Firmware update framework');
+    // Add firmware features section
+    features.push('Firmware Features:');
+    features.push('    "WS2812B LED control"');
+    features.push('    "Button input with mode cycling"');
+    features.push('    "I2C slave communication"');
+    features.push('    "EEPROM address persistence"');
+    features.push('    "Firmware update framework"');
     
     return features;
 }
@@ -246,24 +246,20 @@ function displayFirmwareFeatures(features, container) {
 // Firmware Update Functions
 function handleFileSelect(input) {
     const file = input.files[0];
-    if (file && (file.name.endsWith('.hex') || file.name.endsWith('.bin'))) {
+    if (file && file.name.endsWith('.bin')) {
         selectedFile = file;
         const firmwareStatus = document.getElementById('firmwareStatus');
-        const isPackage = file.name.endsWith('.bin');
-        const fileType = isPackage ? 'Firmware Package' : 'Firmware File';
-        firmwareStatus.textContent = fileType + ' selected: ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+        firmwareStatus.textContent = 'Firmware Package selected: ' + file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
         document.getElementById('uploadBtn').disabled = false;
         document.getElementById('updateBtn').disabled = true;
         
-        // Note: versionInfo element was removed, no need to hide it
-        
-        showNotification(fileType + ' selected: ' + file.name, 'info');
+        showNotification('Firmware Package selected: ' + file.name, 'info');
     } else {
         selectedFile = null;
-        document.getElementById('firmwareStatus').textContent = 'Please select a valid .hex or .bin file';
+        document.getElementById('firmwareStatus').textContent = 'Please select a valid .bin file';
         document.getElementById('uploadBtn').disabled = true;
         document.getElementById('updateBtn').disabled = true;
-        showNotification('Please select a valid .hex or .bin file', 'warning');
+        showNotification('Please select a valid .bin file', 'warning');
     }
 }
 

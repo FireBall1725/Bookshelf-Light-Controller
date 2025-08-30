@@ -62,7 +62,7 @@
         <!-- Firmware Update Section -->
         <div class="firmware-section">
             <h3>ATtiny1616 Firmware Update</h3>
-            <p>Upload a .hex file or .bin package to update the ATtiny1616 firmware over I2C:</p>
+            <p>Upload a .bin package to update the ATtiny1616 firmware over I2C:</p>
             
             <!-- Stored Firmware Management -->
             <div class="firmware-management">
@@ -94,7 +94,7 @@
             <div class="firmware-upload">
                 <h4>Upload New Firmware</h4>
                             <div class="file-input">
-                <input type="file" id="firmwareFile" accept=".hex,.bin" onchange="handleFileSelect(this)">
+                <input type="file" id="firmwareFile" accept=".bin" onchange="handleFileSelect(this)">
             </div>
                 <div class="firmware-controls">
                     <button id="uploadBtn" onclick="uploadFirmware()" disabled class="control-btn upload">Upload to SPIFFS</button>

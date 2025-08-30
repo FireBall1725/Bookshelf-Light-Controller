@@ -22,6 +22,7 @@ public:
     static bool uploadFirmwarePackage(const uint8_t* packageData, size_t packageSize, const String& filename);
     static bool extractFirmwarePackage(const String& packagePath);
     static bool parseFirmwareMetadata(const String& metadataPath, String& version, String& description, String& buildDate, String& board);
+    static bool parseFirmwareMetadataFromString(const String& metadataJson, String& version, String& description, String& buildDate, String& board);
     static String getFirmwarePackageInfo(const String& filename = "firmware-v1.0.1.bin");
     static bool deleteFirmwarePackage(const String& filename = "firmware-v1.0.1.bin");
     static String listFirmwarePackages();

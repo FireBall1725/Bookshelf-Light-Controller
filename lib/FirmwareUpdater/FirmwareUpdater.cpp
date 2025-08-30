@@ -462,29 +462,44 @@ bool FirmwareUpdater::isValidHexLine(const String& hexLine) {
 
 // New methods for .bin package handling
 bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t packageSize, const String& filename) {
-    // First, extract metadata to get version and board info for proper naming
-    // We'll create a temporary file to parse the metadata
-    String tempPath = "/temp_metadata.bin";
-    File tempFile = SPIFFS.open(tempPath, "w");
-    if (!tempFile) {
-        Logger::addEntry("Failed to create temporary metadata file");
+    // Parse metadata directly from package data to get version and board info
+    if (packageSize < 10) {
+        Logger::addEntry("Package too small to be valid");
         return false;
     }
     
-    size_t bytesWritten = tempFile.write(packageData, packageSize);
-    tempFile.close();
-    
-    if (bytesWritten != packageSize) {
-        Logger::addEntry("Failed to write temporary metadata file");
-        SPIFFS.remove(tempPath);
+    // Check magic header "FLFW\0" (5 bytes)
+    const char* expectedMagic = "FLFW\0";
+    if (memcmp(packageData, expectedMagic, 5) != 0) {
+        Logger::addEntry("Invalid package magic header");
         return false;
     }
+    
+    // Read metadata length (4 bytes, little-endian)
+    uint32_t metadataLength = packageData[5] | (packageData[6] << 8) | 
+                              (packageData[7] << 16) | (packageData[8] << 24);
+    
+    Logger::addEntry("Metadata length: " + String(metadataLength) + " bytes");
+    
+    if (metadataLength > 2048 || metadataLength == 0) {
+        Logger::addEntry("Invalid metadata length: " + String(metadataLength));
+        return false;
+    }
+    
+    // Calculate metadata position
+    size_t metadataStart = 9;  // After 5 magic + 4 length
+    if (metadataStart + metadataLength > packageSize) {
+        Logger::addEntry("Package truncated - metadata incomplete");
+        return false;
+    }
+    
+    // Extract metadata JSON string
+    String metadataJson = String((char*)&packageData[metadataStart], metadataLength);
     
     // Parse metadata to get version and board
     String version, description, buildDate, board;
-    if (!parseFirmwareMetadata(tempPath, version, description, buildDate, board)) {
+    if (!parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
         Logger::addEntry("Failed to parse metadata from package");
-        SPIFFS.remove(tempPath);
         return false;
     }
     
@@ -493,13 +508,13 @@ bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t p
     String filepath = getFirmwarePath(properFilename);
     
     Logger::addEntry("Generated filename: " + properFilename);
+    Logger::addEntry("Version: " + version + ", Board: " + board);
     Logger::addEntry("Attempting to create firmware package: " + filepath);
     Logger::addEntry("Package size: " + String(packageSize) + " bytes");
     
     // Check for duplicates
     if (checkDuplicateFirmware(version, board)) {
         Logger::addEntry("Duplicate firmware detected: " + properFilename);
-        SPIFFS.remove(tempPath);
         return false;
     }
     
@@ -512,24 +527,19 @@ bool FirmwareUpdater::uploadFirmwarePackage(const uint8_t* packageData, size_t p
     File file = SPIFFS.open(filepath, "w");
     if (!file) {
         Logger::addEntry("Failed to create firmware package file: " + filepath);
-        SPIFFS.remove(tempPath);
         return false;
     }
     
-    bytesWritten = file.write(packageData, packageSize);
+    size_t bytesWritten = file.write(packageData, packageSize);
     file.close();
     
     if (bytesWritten != packageSize) {
         Logger::addEntry("Failed to write package data. Expected: " + String(packageSize) + ", Written: " + String(bytesWritten));
         SPIFFS.remove(filepath); // Clean up partial file
-        SPIFFS.remove(tempPath);
         return false;
     }
     
     Logger::addEntry("Firmware package uploaded to SPIFFS: " + properFilename + " (" + String(packageSize) + " bytes)");
-    
-    // Clean up temporary file
-    SPIFFS.remove(tempPath);
     
     // Extract the package contents
     return extractFirmwarePackage(filepath);
@@ -689,6 +699,50 @@ bool FirmwareUpdater::parseFirmwareMetadata(const String& metadataPath, String& 
     return true;
 }
 
+bool FirmwareUpdater::parseFirmwareMetadataFromString(const String& metadataJson, String& version, String& description, String& buildDate, String& board) {
+    DynamicJsonDocument doc(2048);
+    DeserializationError error = deserializeJson(doc, metadataJson);
+    
+    if (error) {
+        Logger::addEntry("Failed to parse metadata JSON string: " + String(error.c_str()));
+        return false;
+    }
+    
+    // Extract version info
+    if (doc.containsKey("firmware") && doc["firmware"].containsKey("version")) {
+        version = doc["firmware"]["version"].as<String>();
+    } else {
+        version = "Unknown";
+    }
+    
+    if (doc.containsKey("firmware") && doc["firmware"].containsKey("description")) {
+        description = doc["firmware"]["description"].as<String>();
+    } else {
+        description = "Unknown";
+    }
+    
+    if (doc.containsKey("firmware") && doc["firmware"].containsKey("board")) {
+        board = doc["firmware"]["board"].as<String>();
+    } else {
+        board = "Unknown";
+    }
+    
+    if (doc.containsKey("build_info") && doc["build_info"].containsKey("timestamp")) {
+        String timestamp = doc["build_info"]["timestamp"].as<String>();
+        // Extract date part from ISO timestamp (YYYY-MM-DDTHH:MM:SS...)
+        int dateEnd = timestamp.indexOf('T');
+        if (dateEnd != -1) {
+            buildDate = timestamp.substring(0, dateEnd);
+        } else {
+            buildDate = timestamp;
+        }
+    } else {
+        buildDate = "Unknown";
+    }
+    
+    return true;
+}
+
 String FirmwareUpdater::getFirmwarePackageInfo(const String& filename) {
     if (!firmwarePackageExists(filename)) {
         return "Firmware package not found: " + filename;
@@ -747,28 +801,32 @@ String FirmwareUpdater::listFirmwarePackages() {
     String list = "Firmware Packages:\n";
     bool foundFiles = false;
     
-    // Check for common firmware package filenames
-    const char* packageFiles[] = {
-        "/firmware-v1.0.1.bin",
-        "/firmware-v1.0.0.bin",
-        "/firmware-v1.0.2.bin",
-        "/firmware.bin"
-    };
-    
-    for (const char* filename : packageFiles) {
-        if (SPIFFS.exists(filename)) {
-            File file = SPIFFS.open(filename, "r");
-            if (file) {
-                String displayName = filename;
-                if (displayName.startsWith("/")) {
-                    displayName = displayName.substring(1);
-                }
-                list += "- " + displayName + " (" + String(file.size()) + " bytes)\n";
-                file.close();
-                foundFiles = true;
-            }
-        }
+    // Scan SPIFFS for all .bin files
+    File root = SPIFFS.open("/");
+    if (!root) {
+        return "Failed to open SPIFFS root";
     }
+    
+    if (!root.isDirectory()) {
+        root.close();
+        return "SPIFFS root is not a directory";
+    }
+    
+    File file = root.openNextFile();
+    while (file) {
+        String filename = file.name();
+        if (filename.endsWith(".bin")) {
+            String displayName = filename;
+            if (displayName.startsWith("/")) {
+                displayName = displayName.substring(1);
+            }
+            list += "- " + displayName + " (" + String(file.size()) + " bytes)\n";
+            file.close();
+            foundFiles = true;
+        }
+        file = root.openNextFile();
+    }
+    root.close();
     
     if (!foundFiles) {
         list += "No firmware packages found";
@@ -828,16 +886,42 @@ String FirmwareUpdater::getAllFirmwareInfo() {
             info += "Size: " + String(size) + " bytes\n";
             info += "Modified: " + String(lastModified) + "\n";
             
-            // Try to get metadata info
-            String metadataPath = "/" + filename;
-            metadataPath.replace(".bin", ".meta");
-            if (SPIFFS.exists(metadataPath)) {
-                String version, description, buildDate, board;
-                if (parseFirmwareMetadata(metadataPath, version, description, buildDate, board)) {
-                    info += "Version: " + version + "\n";
-                    info += "Description: " + description + "\n";
-                    info += "Build Date: " + buildDate + "\n";
-                    info += "Board: " + board + "\n";
+            // Try to get metadata info by parsing the .bin package directly
+            String filepath = getFirmwarePath(filename);
+            File packageFile = SPIFFS.open(filepath, "r");
+            if (packageFile) {
+                // Read the package header to get metadata
+                if (packageFile.size() >= 10) {
+                    uint8_t header[10];
+                    packageFile.read(header, 10);
+                    packageFile.close();
+                    
+                    // Check magic header "FLFW\0" (5 bytes)
+                    const char* expectedMagic = "FLFW\0";
+                    if (memcmp(header, expectedMagic, 5) == 0) {
+                        // Read metadata length (4 bytes, little-endian)
+                        uint32_t metadataLength = header[5] | (header[6] << 8) | 
+                                                  (header[7] << 16) | (header[8] << 24);
+                        
+                        if (metadataLength > 0 && metadataLength <= 2048) {
+                            // Read metadata
+                            packageFile = SPIFFS.open(filepath, "r");
+                            packageFile.seek(9); // Skip magic + length
+                            String metadataJson = packageFile.readString();
+                            packageFile.close();
+                            
+                            // Parse metadata
+                            String version, description, buildDate, board;
+                            if (parseFirmwareMetadataFromString(metadataJson, version, description, buildDate, board)) {
+                                info += "Version: " + version + "\n";
+                                info += "Description: " + description + "\n";
+                                info += "Build Date: " + buildDate + "\n";
+                                info += "Board: " + board + "\n";
+                            }
+                        }
+                    }
+                } else {
+                    packageFile.close();
                 }
             }
             

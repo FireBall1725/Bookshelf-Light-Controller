@@ -47,6 +47,7 @@ void WebHandler::setupRoutes() {
     webServer->on("/firmware/packages", HTTP_GET, handleFirmwarePackages);
     webServer->on("/firmware/package/info", HTTP_GET, handleFirmwarePackageInfo);
     webServer->on("/firmware/package/delete", HTTP_GET, handleFirmwarePackageDelete);
+    webServer->on("/firmware/all", HTTP_GET, handleAllFirmware);
     
     // API endpoints for configuration
     webServer->on("/api/config", HTTP_GET, handleAPIConfig);
@@ -460,4 +461,9 @@ void WebHandler::handleFirmwarePackageDelete() {
     } else {
         webServer->send(400, "text/plain", "Missing filename parameter");
     }
+}
+
+void WebHandler::handleAllFirmware() {
+    String allFirmwareInfo = FirmwareUpdater::getAllFirmwareInfo();
+    webServer->send(200, "text/plain", allFirmwareInfo);
 }

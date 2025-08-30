@@ -6,6 +6,8 @@ let firmwareData = null;
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     refreshLog();
+    refreshDeviceInfo();
+    refreshFirmwareTable(); // Load firmware table on page load
     startPeriodicUpdates();
 });
 
@@ -44,137 +46,118 @@ function listStoredFirmware() {
         .then(response => response.text())
         .then(data => {
             document.getElementById('storedFirmwareInfo').textContent = data;
-            
-            // If firmware is found, also get detailed info to populate version fields
-            if (data.includes('attiny_firmware.hex')) {
-                getFirmwareInfo();
-            }
-            
-            showNotification('Stored firmware list retrieved', 'success');
+            showNotification('Firmware list retrieved', 'success');
         })
         .catch(error => {
             console.error('Error listing firmware:', error);
-            showNotification('Failed to list stored firmware', 'error');
+            showNotification('Failed to list firmware', 'error');
         });
 }
 
-function getFirmwareInfo() {
-    // First check if we have any firmware packages
-    fetch('/firmware/packages')
+function refreshFirmwareTable() {
+    fetch('/firmware/all')
         .then(response => response.text())
         .then(data => {
-            if (data.includes('No firmware packages found')) {
-                // No packages, check legacy hex file
-                fetch('/firmware/info')
-                    .then(response => response.text())
-                    .then(hexData => {
-                        document.getElementById('storedFirmwareInfo').textContent = hexData;
-                        showNotification('Legacy firmware info retrieved', 'info');
-                    })
-                    .catch(error => {
-                        console.error('Error getting legacy firmware info:', error);
-                        document.getElementById('storedFirmwareInfo').textContent = 'No firmware found';
-                    });
-                return;
-            }
-            
-            // We have packages, get the first one's info
-            const lines = data.split('\n');
-            for (const line of lines) {
-                if (line.includes('.bin') && line.includes('bytes')) {
-                    const filename = line.match(/- (.+?) \(/)?.[1];
-                    if (filename) {
-                        // Get detailed info for this package
-                        fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
-                            .then(response => response.text())
-                            .then(packageData => {
-                                document.getElementById('storedFirmwareInfo').textContent = packageData;
-                                
-                                // Parse package info and populate version fields
-                                const packageLines = packageData.split('\n');
-                                let version = 'Unknown';
-                                let buildDate = 'Unknown';
-                                let size = 'Unknown';
-                                
-                                for (const packageLine of packageLines) {
-                                    if (packageLine.includes('Size:')) {
-                                        size = packageLine.split('Size:')[1].trim();
-                                    } else if (packageLine.includes('Version:')) {
-                                        version = packageLine.split('Version:')[1].trim();
-                                    } else if (packageLine.includes('Build Date:')) {
-                                        buildDate = packageLine.split('Build Date:')[1].trim();
-                                    }
-                                }
-                                
-                                // Update version info display
-                                document.getElementById('newVersion').textContent = 'New: ' + version;
-                                document.getElementById('buildDate').textContent = 'Build: ' + buildDate;
-                                
-                                showNotification('Firmware package info retrieved', 'success');
-                            })
-                            .catch(error => {
-                                console.error('Error getting package info:', error);
-                                showNotification('Failed to get package info', 'error');
-                            });
-                        break;
-                    }
-                }
-            }
+            populateFirmwareTable(data);
+            showNotification('Firmware table refreshed', 'success');
         })
         .catch(error => {
-            console.error('Error getting firmware packages:', error);
-            showNotification('Failed to get firmware packages', 'error');
+            console.error('Error refreshing firmware table:', error);
+            showNotification('Failed to refresh firmware table', 'error');
         });
 }
 
-function deleteStoredFirmware() {
-    if (confirm('Are you sure you want to delete the stored firmware? This action cannot be undone.')) {
-        // First check what type of firmware we have
-        fetch('/firmware/packages')
+function populateFirmwareTable(firmwareData) {
+    const tbody = document.getElementById('firmwareTableBody');
+    
+    if (firmwareData.includes('No firmware packages found')) {
+        tbody.innerHTML = '<tr><td colspan="6">No firmware packages found</td></tr>';
+        return;
+    }
+    
+    // Parse the firmware data
+    const packages = firmwareData.split('---');
+    let tableHTML = '';
+    
+    packages.forEach(package => {
+        if (package.trim() === '') return;
+        
+        const lines = package.trim().split('\n');
+        let filename = 'Unknown';
+        let size = 'Unknown';
+        let version = 'Unknown';
+        let board = 'Unknown';
+        let buildDate = 'Unknown';
+        
+        lines.forEach(line => {
+            if (line.startsWith('Filename:')) {
+                filename = line.split('Filename:')[1].trim();
+            } else if (line.startsWith('Size:')) {
+                size = line.split('Size:')[1].trim();
+            } else if (line.startsWith('Version:')) {
+                version = line.split('Version:')[1].trim();
+            } else if (line.startsWith('Board:')) {
+                board = line.split('Board:')[1].trim();
+            } else if (line.startsWith('Build Date:')) {
+                buildDate = line.split('Build Date:')[1].trim();
+            }
+        });
+        
+        // Format size for display
+        let displaySize = size;
+        if (size !== 'Unknown' && !isNaN(size)) {
+            const sizeNum = parseInt(size);
+            if (sizeNum > 1024) {
+                displaySize = (sizeNum / 1024).toFixed(1) + ' KB';
+            } else {
+                displaySize = sizeNum + ' B';
+            }
+        }
+        
+        tableHTML += `
+            <tr>
+                <td>${filename}</td>
+                <td>${displaySize}</td>
+                <td>${version}</td>
+                <td>${board}</td>
+                <td>${buildDate}</td>
+                <td>
+                    <button class="action-btn info" onclick="getFirmwareInfo('${filename}')" title="Get Info">ℹ️</button>
+                    <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete">🗑️</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = tableHTML;
+}
+
+function deleteFirmware(filename) {
+    if (confirm(`Are you sure you want to delete firmware: ${filename}?`)) {
+        fetch(`/firmware/package/delete?filename=${encodeURIComponent(filename)}`)
             .then(response => response.text())
             .then(data => {
-                if (data.includes('No firmware packages found')) {
-                    // Delete legacy hex file
-                    fetch('/firmware/delete?filename=attiny_firmware.hex')
-                        .then(response => response.text())
-                        .then(deleteData => {
-                            document.getElementById('storedFirmwareInfo').textContent = deleteData;
-                            showNotification('Legacy firmware deleted', 'success');
-                            document.getElementById('updateBtn').disabled = true;
-                        })
-                        .catch(error => {
-                            console.error('Error deleting legacy firmware:', error);
-                            showNotification('Failed to delete legacy firmware', 'error');
-                        });
-                } else {
-                    // Delete the first package found
-                    const lines = data.split('\n');
-                    for (const line of lines) {
-                        if (line.includes('.bin') && line.includes('bytes')) {
-                            const filename = line.match(/- (.+?) \(/)?.[1];
-                            if (filename) {
-                                fetch(`/firmware/package/delete?filename=${encodeURIComponent(filename)}`)
-                                    .then(response => response.text())
-                                    .then(deleteData => {
-                                        document.getElementById('storedFirmwareInfo').textContent = deleteData;
-                                        showNotification('Firmware package deleted', 'success');
-                                        document.getElementById('updateBtn').disabled = true;
-                                    })
-                                    .catch(error => {
-                                        console.error('Error deleting firmware package:', error);
-                                        showNotification('Failed to delete firmware package', 'error');
-                                    });
-                                break;
-                            }
-                        }
-                    }
-                }
+                showNotification('Firmware deleted successfully', 'success');
+                refreshFirmwareTable(); // Refresh the table
             })
             .catch(error => {
-                console.error('Error checking firmware type:', error);
-                showNotification('Failed to check firmware type', 'error');
+                console.error('Error deleting firmware:', error);
+                showNotification('Failed to delete firmware', 'error');
             });
     }
+}
+
+function getFirmwareInfo(filename) {
+    fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('storedFirmwareInfo').textContent = data;
+            showNotification('Firmware info retrieved', 'success');
+        })
+        .catch(error => {
+            console.error('Error getting firmware info:', error);
+            showNotification('Failed to get firmware info', 'error');
+        });
 }
 
 // Firmware Update Functions

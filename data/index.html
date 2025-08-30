@@ -71,7 +71,30 @@
                     <button onclick="listStoredFirmware()" class="control-btn info">List Stored</button>
                     <button onclick="getFirmwareInfo()" class="control-btn info">Get Info</button>
                     <button onclick="deleteStoredFirmware()" class="control-btn delete">Delete Stored</button>
+                    <button onclick="refreshFirmwareTable()" class="control-btn info">Refresh Table</button>
                 </div>
+                
+                <!-- Firmware Table -->
+                <div class="firmware-table-container">
+                    <table id="firmwareTable" class="firmware-table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Version</th>
+                                <th>Board</th>
+                                <th>Build Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="firmwareTableBody">
+                            <tr>
+                                <td colspan="6">Loading firmware list...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
                 <div id="storedFirmwareInfo" class="firmware-info"></div>
             </div>
             

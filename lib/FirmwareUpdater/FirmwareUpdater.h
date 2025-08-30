@@ -21,11 +21,16 @@ public:
     // New methods for .bin package handling
     static bool uploadFirmwarePackage(const uint8_t* packageData, size_t packageSize, const String& filename);
     static bool extractFirmwarePackage(const String& packagePath);
-    static bool parseFirmwareMetadata(const String& metadataPath, String& version, String& description, String& buildDate);
+    static bool parseFirmwareMetadata(const String& metadataPath, String& version, String& description, String& buildDate, String& board);
     static String getFirmwarePackageInfo(const String& filename = "firmware-v1.0.1.bin");
     static bool deleteFirmwarePackage(const String& filename = "firmware-v1.0.1.bin");
     static String listFirmwarePackages();
     static bool firmwarePackageExists(const String& filename = "firmware-v1.0.1.bin");
+    
+    // Enhanced package management
+    static String generateFirmwareFilename(const String& version, const String& board);
+    static bool checkDuplicateFirmware(const String& version, const String& board);
+    static String getAllFirmwareInfo();
 
 private:
     static const int ATTINY_ADDRESS = 0x50;

@@ -48,6 +48,7 @@ public:
     static void handleFirmwarePackages();
     static void handleFirmwarePackageInfo();
     static void handleFirmwarePackageDelete();
+    static void handleAllFirmware();
     
     // API endpoints for configuration
     static void handleAPIConfig();

@@ -590,7 +590,7 @@ bool FirmwareUpdater::extractFirmwarePackage(const String& packagePath) {
     return true;
 }
 
-bool FirmwareUpdater::parseFirmwareMetadata(const String& metadataPath, String& version, String& description, String& buildDate) {
+bool FirmwareUpdater::parseFirmwareMetadata(const String& metadataPath, String& version, String& description, String& buildDate, String& board) {
     if (!SPIFFS.exists(metadataPath)) {
         Logger::addEntry("Metadata file not found: " + metadataPath);
         return false;
@@ -624,6 +624,12 @@ bool FirmwareUpdater::parseFirmwareMetadata(const String& metadataPath, String& 
         description = doc["firmware"]["description"].as<String>();
     } else {
         description = "Unknown";
+    }
+    
+    if (doc.containsKey("firmware") && doc["firmware"].containsKey("board")) {
+        board = doc["firmware"]["board"].as<String>();
+    } else {
+        board = "Unknown";
     }
     
     if (doc.containsKey("build_info") && doc["build_info"].containsKey("timestamp")) {
@@ -662,15 +668,16 @@ String FirmwareUpdater::getFirmwarePackageInfo(const String& filename) {
     info += "Modified: " + String(lastModified) + "\n";
     info += "Type: Firmware Package (.bin)\n";
     
-    // Try to get metadata info if available
-    if (SPIFFS.exists("/firmware.meta")) {
-        String version, description, buildDate;
-        if (parseFirmwareMetadata("/firmware.meta", version, description, buildDate)) {
-            info += "Version: " + version + "\n";
-            info += "Description: " + description + "\n";
-            info += "Build Date: " + buildDate + "\n";
-        }
-    }
+                // Try to get metadata info if available
+            if (SPIFFS.exists("/firmware.meta")) {
+                String version, description, buildDate, board;
+                if (parseFirmwareMetadata("/firmware.meta", version, description, buildDate, board)) {
+                    info += "Version: " + version + "\n";
+                    info += "Description: " + description + "\n";
+                    info += "Build Date: " + buildDate + "\n";
+                    info += "Board: " + board + "\n";
+                }
+            }
     
     return info;
 }
@@ -731,4 +738,77 @@ String FirmwareUpdater::listFirmwarePackages() {
 
 bool FirmwareUpdater::firmwarePackageExists(const String& filename) {
     return SPIFFS.exists(getFirmwarePath(filename));
+}
+
+// Enhanced package management methods
+String FirmwareUpdater::generateFirmwareFilename(const String& version, const String& board) {
+    String filename = "firmware-";
+    filename += version;
+    filename += "-";
+    filename += board;
+    filename += ".bin";
+    return filename;
+}
+
+bool FirmwareUpdater::checkDuplicateFirmware(const String& version, const String& board) {
+    String filename = generateFirmwareFilename(version, board);
+    return firmwarePackageExists(filename);
+}
+
+String FirmwareUpdater::getAllFirmwareInfo() {
+    String info = "";
+    bool foundFiles = false;
+    
+    // Scan SPIFFS for all .bin files
+    File root = SPIFFS.open("/");
+    if (!root) {
+        return "Failed to open SPIFFS root";
+    }
+    
+    if (!root.isDirectory()) {
+        root.close();
+        return "SPIFFS root is not a directory";
+    }
+    
+    File file = root.openNextFile();
+    while (file) {
+        String filename = file.name();
+        if (filename.endsWith(".bin")) {
+            if (foundFiles) {
+                info += "\n---\n";
+            }
+            
+            // Get basic file info
+            size_t size = file.size();
+            time_t lastModified = file.getLastWrite();
+            file.close();
+            
+            info += "Filename: " + filename + "\n";
+            info += "Size: " + String(size) + " bytes\n";
+            info += "Modified: " + String(lastModified) + "\n";
+            
+            // Try to get metadata info
+            String metadataPath = "/" + filename;
+            metadataPath.replace(".bin", ".meta");
+            if (SPIFFS.exists(metadataPath)) {
+                String version, description, buildDate, board;
+                if (parseFirmwareMetadata(metadataPath, version, description, buildDate, board)) {
+                    info += "Version: " + version + "\n";
+                    info += "Description: " + description + "\n";
+                    info += "Build Date: " + buildDate + "\n";
+                    info += "Board: " + board + "\n";
+                }
+            }
+            
+            foundFiles = true;
+        }
+        file = root.openNextFile();
+    }
+    root.close();
+    
+    if (!foundFiles) {
+        info = "No firmware packages found";
+    }
+    
+    return info;
 }

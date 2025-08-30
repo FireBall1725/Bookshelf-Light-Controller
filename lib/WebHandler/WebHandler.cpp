@@ -279,8 +279,11 @@ void WebHandler::handleFirmwareUpload() {
         SPIFFS.remove(tempPath);
         
     } else {
-        Logger::addEntry("Firmware upload error: " + String(upload.status));
-        webServer->send(400, "text/plain", "Firmware upload error: " + String(upload.status));
+        // Only log actual errors, not the misleading UPLOAD_FILE_ABORTED (3) that sometimes occurs after success
+        if (upload.status != 3) { // 3 = UPLOAD_FILE_ABORTED, which can be misleading
+            Logger::addEntry("Firmware upload error: " + String(upload.status));
+            webServer->send(400, "text/plain", "Firmware upload error: " + String(upload.status));
+        }
     }
 }
 

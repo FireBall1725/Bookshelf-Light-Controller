@@ -76,6 +76,13 @@ void setup() {
         
         if (WiFi.status() == WL_CONNECTED) {
             Logger::addEntry("Connected to stored WiFi successfully!");
+            // Ensure credentials are saved even when connecting to stored WiFi
+            String ssid = WiFi.SSID();
+            String password = WiFi.psk();
+            if (ssid.length() > 0) {
+                ConfigManager::setWiFiConfig(ssid, password);
+                Logger::addEntry("WiFi credentials confirmed and saved: " + ssid);
+            }
         } else {
             Logger::addEntry("Failed to connect to stored WiFi, entering setup mode");
             if (!wifiManager.autoConnect("ESP32C3_Setup")) {
@@ -98,6 +105,14 @@ void setup() {
     Logger::addEntry("IP Address: " + WiFi.localIP().toString());
     Logger::addEntry("MAC Address: " + WiFi.macAddress());
     Logger::addEntry("Signal Strength: " + String(WiFi.RSSI()) + " dBm");
+    
+    // Ensure current WiFi credentials are saved
+    String currentSSID = WiFi.SSID();
+    String currentPassword = WiFi.psk();
+    if (currentSSID.length() > 0) {
+        ConfigManager::setWiFiConfig(currentSSID, currentPassword);
+        Logger::addEntry("Current WiFi credentials saved: " + currentSSID);
+    }
     
     LEDController::wifiConnected();
     

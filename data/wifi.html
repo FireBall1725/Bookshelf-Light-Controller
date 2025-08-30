@@ -3,6 +3,7 @@
 <head>
     <title>WiFi Configuration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -175,7 +176,7 @@
         <h1>WiFi Configuration</h1>
         
         <div class="warning">
-            <strong>⚠️ Warning:</strong> Changing WiFi credentials will restart the device and may disconnect you temporarily.
+            <strong><i class="fas fa-exclamation-triangle"></i> Warning:</strong> Changing WiFi credentials will restart the device and may disconnect you temporarily.
         </div>
         
         <div id="currentWiFi" class="current-wifi hidden">
@@ -186,10 +187,10 @@
         
         <div style="margin: 20px 0;">
             <button type="button" class="scan-btn" onclick="scanWiFi()">
-                🔍 Scan for WiFi Networks
+                <i class="fas fa-search"></i> Scan for WiFi Networks
             </button>
             <button type="button" onclick="loadCurrentWiFi()">
-                🔄 Refresh Current Settings
+                <i class="fas fa-sync-alt"></i> Refresh Current Settings
             </button>
         </div>
         
@@ -212,7 +213,7 @@
         <div id="message"></div>
         
         <div class="back-link">
-            <a href="/">← Back to Main Page</a>
+            <a href="/"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
         </div>
     </div>
     
@@ -273,7 +274,7 @@
                                 <div class="network-ssid">${network.ssid}</div>
                                 <div class="network-details">
                                     <span class="network-signal">${signalStrength} (${network.rssi} dBm)</span>
-                                    <span class="network-encryption">${network.encryption}</span>
+                                    <span class="network-encryption"><i class="fas fa-shield-alt"></i> ${network.encryption}</span>
                                 </div>
                             </div>
                         `;
@@ -292,11 +293,11 @@
         }
         
         function getSignalStrength(rssi) {
-            if (rssi >= -50) return '🔴 Excellent';
-            if (rssi >= -60) return '🟠 Very Good';
-            if (rssi >= -70) return '🟡 Good';
-            if (rssi >= -80) return '🟢 Fair';
-            return '🔵 Poor';
+            if (rssi >= -50) return '<i class="fas fa-wifi" style="color: #e74c3c;"></i> Excellent';
+            if (rssi >= -60) return '<i class="fas fa-wifi" style="color: #f39c12;"></i> Very Good';
+            if (rssi >= -70) return '<i class="fas fa-wifi" style="color: #f1c40f;"></i> Good';
+            if (rssi >= -80) return '<i class="fas fa-wifi" style="color: #27ae60;"></i> Fair';
+            return '<i class="fas fa-wifi" style="color: #3498db;"></i> Poor';
         }
         
         document.getElementById('wifiForm').onsubmit = function(e) {

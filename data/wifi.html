@@ -293,11 +293,11 @@
         }
         
         function getSignalStrength(rssi) {
-            if (rssi >= -50) return '<i class="fas fa-wifi" style="color: #e74c3c;"></i> Excellent';
-            if (rssi >= -60) return '<i class="fas fa-wifi" style="color: #f39c12;"></i> Very Good';
+            if (rssi >= -50) return '<i class="fas fa-wifi" style="color: #27ae60;"></i> Excellent';
+            if (rssi >= -60) return '<i class="fas fa-wifi" style="color: #3498db;"></i> Very Good';
             if (rssi >= -70) return '<i class="fas fa-wifi" style="color: #f1c40f;"></i> Good';
-            if (rssi >= -80) return '<i class="fas fa-wifi" style="color: #27ae60;"></i> Fair';
-            return '<i class="fas fa-wifi" style="color: #3498db;"></i> Poor';
+            if (rssi >= -80) return '<i class="fas fa-wifi" style="color: #f39c12;"></i> Fair';
+            return '<i class="fas fa-wifi" style="color: #e74c3c;"></i> Poor';
         }
         
         document.getElementById('wifiForm').onsubmit = function(e) {

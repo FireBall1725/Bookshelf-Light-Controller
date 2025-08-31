@@ -423,10 +423,27 @@ h1 i {
     animation: pulse 2s infinite;
 }
 
+/* Auto-scroll indicator */
+.log-entries.auto-scroll::before {
+    content: "↓";
+    position: absolute;
+    top: 8px;
+    right: 24px;
+    color: #ff6b6b;
+    font-size: 12px;
+    animation: bounce 1s infinite;
+}
+
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.5; }
     100% { opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-3px); }
+    60% { transform: translateY(-2px); }
 }
 
 /* Keep the old log-entry styles for backward compatibility */

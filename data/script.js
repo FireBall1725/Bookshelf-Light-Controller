@@ -16,6 +16,15 @@ $(document).ready(function() {
     
     // Add responsive behavior
     setupResponsiveBehavior();
+    
+    // Enable auto-refresh by default
+    setTimeout(() => {
+        autoRefresh();
+    }, 500);
+    
+    // Initialize auto-scroll status
+    document.getElementById('autoScrollStatus').textContent = 'ON';
+    document.getElementById('logEntries').classList.add('auto-scroll');
 });
 
 // Responsive behavior setup
@@ -564,12 +573,28 @@ function refreshLog() {
         .then(data => {
             // Format the log data to look like a Linux tail -f log
             const formattedLog = formatLogDataLinux(data);
-            document.getElementById('logEntries').innerHTML = formattedLog;
+            const logContainer = document.getElementById('logEntries');
+            const wasScrolledToBottom = isScrolledToBottom(logContainer);
+            
+            logContainer.innerHTML = formattedLog;
+            
+            // Auto-scroll to bottom if auto-scroll is enabled and user was at bottom
+            if (autoScrollEnabled && wasScrolledToBottom) {
+                scrollToBottom(logContainer);
+            }
         })
         .catch(error => {
             console.error('Error refreshing log:', error);
             document.getElementById('logEntries').innerHTML = '<div class="log-line">Error loading log</div>';
         });
+}
+
+function isScrolledToBottom(element) {
+    return Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) < 10;
+}
+
+function scrollToBottom(element) {
+    element.scrollTop = element.scrollHeight;
 }
 
 function formatLogData(logData) {
@@ -681,6 +706,9 @@ function clearLog() {
         });
 }
 
+// Global variables for auto-scroll control
+let autoScrollEnabled = true;
+
 function autoRefresh() {
     const autoRefreshStatus = document.getElementById('autoRefreshStatus');
     const logEntries = document.getElementById('logEntries');
@@ -696,6 +724,23 @@ function autoRefresh() {
         autoRefreshStatus.textContent = 'ON (2s)';
         logEntries.classList.add('following');
         showNotification('Auto-refresh enabled', 'success');
+    }
+}
+
+function toggleAutoScroll() {
+    autoScrollEnabled = !autoScrollEnabled;
+    const logEntries = document.getElementById('logEntries');
+    const autoScrollStatus = document.getElementById('autoScrollStatus');
+    
+    if (autoScrollEnabled) {
+        logEntries.classList.add('auto-scroll');
+        autoScrollStatus.textContent = 'ON';
+        scrollToBottom(logEntries);
+        showNotification('Auto-scroll enabled', 'success');
+    } else {
+        logEntries.classList.remove('auto-scroll');
+        autoScrollStatus.textContent = 'OFF';
+        showNotification('Auto-scroll disabled', 'info');
     }
 }
 

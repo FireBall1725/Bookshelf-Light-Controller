@@ -835,12 +835,8 @@ function showSystemLogModal() {
     const logEntries = document.getElementById('modalLogEntries');
     
     if (autoRefreshStatus) {
-        // Check if auto-refresh is currently running
-        if (autoRefreshInterval) {
-            autoRefreshStatus.textContent = 'ON (2s)';
-        } else {
-            autoRefreshStatus.textContent = 'OFF';
-        }
+        // Always start with OFF status for modal auto-refresh
+        autoRefreshStatus.textContent = 'OFF';
     }
     
     if (autoScrollStatus && logEntries) {

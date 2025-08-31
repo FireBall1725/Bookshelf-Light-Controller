@@ -1,48 +1,16 @@
 #include "Logger.h"
-#include "TimeManager.h"
 
 String Logger::logEntries[MAX_LOG_ENTRIES];
 int Logger::logIndex = 0;
 bool Logger::logWrapped = false;
-bool Logger::timestampsEnabled = true;
 
 void Logger::init() {
     logIndex = 0;
     logWrapped = false;
-    timestampsEnabled = true;
 }
 
 void Logger::addEntry(String message) {
-    String timestamp;
-    
-    if (timestampsEnabled && timeManager.isTimeValid()) {
-        timestamp = timeManager.getTimestamp();
-    } else {
-        timestamp = "[" + String(millis() / 1000) + "s]";
-    }
-    
-    String logEntry = timestamp + " " + message;
-    
-    logEntries[logIndex] = logEntry;
-    logIndex = (logIndex + 1) % MAX_LOG_ENTRIES;
-    
-    if (logIndex == 0) {
-        logWrapped = true;
-    }
-    
-    // Also output to serial if available
-    Serial.println(logEntry);
-}
-
-void Logger::addEntryWithTimestamp(String message) {
-    String timestamp;
-    
-    if (timestampsEnabled && timeManager.isTimeValid()) {
-        timestamp = timeManager.getTimestamp();
-    } else {
-        timestamp = "[" + String(millis() / 1000) + "s]";
-    }
-    
+    String timestamp = "[" + String(millis() / 1000) + "s]";
     String logEntry = timestamp + " " + message;
     
     logEntries[logIndex] = logEntry;
@@ -117,12 +85,4 @@ String Logger::getLogEntries() {
     }
     
     return logText;
-}
-
-void Logger::enableTimestamps(bool enable) {
-    timestampsEnabled = enable;
-}
-
-bool Logger::areTimestampsEnabled() {
-    return timestampsEnabled;
 }

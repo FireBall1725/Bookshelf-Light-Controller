@@ -770,33 +770,9 @@ function startPeriodicUpdates() {
             })
             .catch(error => console.error('Error updating device info:', error));
     }, 1000);
-    
-    // Update time display every second
-    setInterval(updateTimeDisplay, 1000);
 }
 
-// Time display update
-function updateTimeDisplay() {
-    fetch('/time')
-        .then(response => response.json())
-        .then(data => {
-            if (document.getElementById('currentTime')) {
-                if (data.valid) {
-                    document.getElementById('currentTime').textContent = data.time;
-                    document.getElementById('currentTime').style.color = '#ffffff';
-                } else {
-                    document.getElementById('currentTime').textContent = 'Time not synchronized';
-                    document.getElementById('currentTime').style.color = '#ff6b6b';
-                }
-            }
-        })
-        .catch(error => {
-            if (document.getElementById('currentTime')) {
-                document.getElementById('currentTime').textContent = 'Error loading time';
-                document.getElementById('currentTime').style.color = '#ff6b6b';
-            }
-        });
-}
+
 
 // Utility Functions
 function showNotification(message, type = 'info') {

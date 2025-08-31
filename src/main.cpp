@@ -11,7 +11,6 @@
 #include "HomeAssistantMQTT.h"
 #include "ConfigManager.h"
 #include "WebHandler.h"
-#include "TimeManager.h"
 
 // WiFi and Web Server
 WebServer server(80);
@@ -32,7 +31,6 @@ void setup() {
     I2CScanner::init();
     FirmwareUpdater::init();
     HomeAssistantMQTT::init();
-    timeManager.begin();
     
     // Startup sequence
     Logger::addEntry("ESP32 C3 Mini 1 Starting...");
@@ -118,16 +116,6 @@ void setup() {
     
     LEDController::wifiConnected();
     
-    // Sync time with NTP server
-    Logger::addEntry("Synchronizing time with NTP server...");
-    timeManager.forceTimeSync();
-    
-    if (timeManager.isTimeValid()) {
-        Logger::addEntry("Time synchronized: " + timeManager.getFormattedDateTime());
-    } else {
-        Logger::addEntry("Time synchronization failed, using millis() timestamps");
-    }
-    
     // Connect to Home Assistant via MQTT
     HomeAssistantMQTT::connect();
     
@@ -162,9 +150,6 @@ void setup() {
 
 void loop() {
     server.handleClient();
-    
-    // Update TimeManager (handles NTP sync)
-    timeManager.update();
     
     // Handle MQTT operations
     if (HomeAssistantMQTT::isConnected()) {

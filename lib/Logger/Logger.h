@@ -9,23 +9,17 @@ public:
     
     static void init();
     static void addEntry(String message);
-    static void addEntryWithTimestamp(String message);
     static String getLogs();
     static void clearLogs();
     static int getLogCount();
     
     // New method for getting log entries as plain text
     static String getLogEntries();
-    
-    // Timestamp control
-    static void enableTimestamps(bool enable);
-    static bool areTimestampsEnabled();
 
 private:
     static String logEntries[MAX_LOG_ENTRIES];
     static int logIndex;
     static bool logWrapped;
-    static bool timestampsEnabled;
 };
 
 #endif

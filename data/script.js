@@ -304,12 +304,9 @@ function formatFirmwareFeatures(features) {
             // Second line is the "Firmware Features:" title
             formattedHtml += `<div class="firmware-info-title">${trimmedLine}</div>`;
         } else {
-            // Remaining lines are features with bullet points
-            if (trimmedLine.startsWith('•')) {
-                formattedHtml += `<div class="firmware-info-feature">${trimmedLine}</div>`;
-            } else {
-                formattedHtml += `<div class="firmware-info-feature">• ${trimmedLine}</div>`;
-            }
+            // Remaining lines are features - remove any existing bullet points and add clean ones
+            const cleanFeature = trimmedLine.replace(/^•\s*/, ''); // Remove existing bullet points
+            formattedHtml += `<div class="firmware-info-feature">${cleanFeature}</div>`;
         }
     });
     
@@ -350,15 +347,15 @@ function parseRealFirmwareMetadata(infoText, filename) {
         // Parse the comma-separated features from the backend
         const featureArray = featuresList.split(',');
         featureArray.forEach(feature => {
-            features.push('• ' + feature.trim());
+            features.push(feature.trim()); // Don't add bullet points here
         });
     } else {
         // Fallback to default features if none provided
-        features.push('• WS2812B LED control');
-        features.push('• Button input with mode cycling');
-        features.push('• I2C slave communication');
-        features.push('• EEPROM address persistence');
-        features.push('• Firmware update framework');
+        features.push('WS2812B LED control');
+        features.push('Button input with mode cycling');
+        features.push('I2C slave communication');
+        features.push('EEPROM address persistence');
+        features.push('Firmware update framework');
     }
     
     // Return as a comma-separated string for the modal formatter

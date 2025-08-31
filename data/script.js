@@ -807,41 +807,57 @@ function startPeriodicUpdates() {
 
 
 
-// Section Toggle Functions
-function toggleSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        if (section.style.display === 'none') {
-            section.style.display = 'block';
-            // If it's the system log, refresh it when showing
-            if (sectionId === 'system-log') {
-                refreshLog();
+// Modal Functions
+function showDeviceInfoModal() {
+    const modal = document.getElementById('deviceInfoModal');
+    modal.style.display = 'block';
+    
+    // Refresh device info data
+    fetch('/uptime')
+        .then(response => response.json())
+        .then(data => {
+            if (document.getElementById('modalUptime')) {
+                document.getElementById('modalUptime').textContent = data.uptime;
             }
-            // If it's device info, refresh the data when showing
-            if (sectionId === 'device-info') {
-                // Trigger a device info update
-                fetch('/uptime')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (document.getElementById('uptime')) {
-                            document.getElementById('uptime').textContent = data.uptime;
-                        }
-                        if (document.getElementById('macAddress')) {
-                            document.getElementById('macAddress').textContent = data.mac;
-                        }
-                        if (document.getElementById('ipAddress')) {
-                            document.getElementById('ipAddress').textContent = data.ip;
-                        }
-                        if (document.getElementById('rssi')) {
-                            document.getElementById('rssi').textContent = data.rssi + ' dBm';
-                        }
-                    })
-                    .catch(error => console.error('Error updating device info:', error));
+            if (document.getElementById('modalMacAddress')) {
+                document.getElementById('modalMacAddress').textContent = data.mac;
             }
-        } else {
-            section.style.display = 'none';
-        }
+            if (document.getElementById('modalIpAddress')) {
+                document.getElementById('modalIpAddress').textContent = data.ip;
+            }
+            if (document.getElementById('modalRssi')) {
+                document.getElementById('modalRssi').textContent = data.rssi + ' dBm';
+            }
+        })
+        .catch(error => console.error('Error updating device info:', error));
+}
+
+function closeDeviceInfoModal() {
+    const modal = document.getElementById('deviceInfoModal');
+    modal.style.display = 'none';
+}
+
+function showSystemLogModal() {
+    const modal = document.getElementById('systemLogModal');
+    modal.style.display = 'block';
+    
+    // Refresh log data
+    refreshLog();
+    
+    // Update modal status elements
+    if (document.getElementById('modalAutoRefreshStatus')) {
+        document.getElementById('modalAutoRefreshStatus').textContent = 
+            document.getElementById('autoRefreshStatus')?.textContent || 'OFF';
     }
+    if (document.getElementById('modalAutoScrollStatus')) {
+        document.getElementById('modalAutoScrollStatus').textContent = 
+            document.getElementById('autoScrollStatus')?.textContent || 'ON';
+    }
+}
+
+function closeSystemLogModal() {
+    const modal = document.getElementById('systemLogModal');
+    modal.style.display = 'none';
 }
 
 // Utility Functions

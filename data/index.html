@@ -23,10 +23,10 @@
             <div class="config-controls">
                 <a href="/config" class="config-btn mqtt">MQTT Settings</a>
                 <a href="/wifi" class="config-btn wifi">WiFi Settings</a>
-                <button onclick="toggleSection('device-info')" class="config-btn device-info">
+                <button onclick="showDeviceInfoModal()" class="config-btn device-info">
                     <i class="fas fa-microchip"></i> Device Info
                 </button>
-                <button onclick="toggleSection('system-log')" class="config-btn system-log">
+                <button onclick="showSystemLogModal()" class="config-btn system-log">
                     <i class="fas fa-terminal"></i> System Log
                 </button>
             </div>
@@ -132,28 +132,56 @@
             </div>
         </div>
         
-        <!-- Device Info Section -->
-        <div id="device-info" class="info" style="display: none;">
-            <h3>Device Info</h3>
-            <p><strong>Chip:</strong> ESP32-C3</p>
-            <p><strong>MAC Address:</strong> <span id="macAddress">Loading...</span></p>
-            <p><strong>IP Address:</strong> <span id="ipAddress">Loading...</span></p>
-            <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
-            <p><strong>WiFi RSSI:</strong> <span id="rssi">Loading...</span></p>
-            <p><strong>I2C Pins:</strong> SDA:GPIO6, SCL:GPIO7</p>
+        <!-- Device Info Modal -->
+        <div id="deviceInfoModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-microchip"></i> Device Information</h3>
+                    <span class="modal-close" onclick="closeDeviceInfoModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="device-info-grid">
+                        <div class="info-item">
+                            <strong>Chip:</strong> ESP32-C3
+                        </div>
+                        <div class="info-item">
+                            <strong>MAC Address:</strong> <span id="modalMacAddress">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>IP Address:</strong> <span id="modalIpAddress">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Uptime:</strong> <span id="modalUptime">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>WiFi RSSI:</strong> <span id="modalRssi">Loading...</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>I2C Pins:</strong> SDA:GPIO6, SCL:GPIO7
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <!-- System Log Section -->
-        <div id="system-log" class="log-section" style="display: none;">
-            <h3>System Log</h3>
-            <div class="log-controls">
-                <button onclick="refreshLog()" class="control-btn">Refresh Log</button>
-                <button onclick="clearLog()" class="control-btn">Clear Log</button>
-                <button onclick="scanI2C()" class="control-btn">Scan I2C</button>
-                <button onclick="autoRefresh()" class="control-btn">Auto-refresh: <span id="autoRefreshStatus">OFF</span></button>
-                <button onclick="toggleAutoScroll()" class="control-btn">Auto-scroll: <span id="autoScrollStatus">ON</span></button>
+        <!-- System Log Modal -->
+        <div id="systemLogModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-terminal"></i> System Log</h3>
+                    <span class="modal-close" onclick="closeSystemLogModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="log-controls">
+                        <button onclick="refreshLog()" class="control-btn">Refresh Log</button>
+                        <button onclick="clearLog()" class="control-btn">Clear Log</button>
+                        <button onclick="scanI2C()" class="control-btn">Scan I2C</button>
+                        <button onclick="autoRefresh()" class="control-btn">Auto-refresh: <span id="modalAutoRefreshStatus">OFF</span></button>
+                        <button onclick="toggleAutoScroll()" class="control-btn">Auto-scroll: <span id="modalAutoScrollStatus">ON</span></button>
+                    </div>
+                    <div id="modalLogEntries" class="log-entries">Loading log...</div>
+                </div>
             </div>
-            <div id="logEntries" class="log-entries">Loading log...</div>
         </div>
     </div>
     

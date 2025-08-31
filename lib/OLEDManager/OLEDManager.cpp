@@ -103,6 +103,15 @@ void OLEDManager::showI2CInfo() {
     display->display();
 }
 
+void OLEDManager::showDefaultDisplay() {
+    if (!isAvailable()) return;
+    
+    display->clearDisplay();
+    drawHeader();
+    drawDefaultInfo();
+    display->display();
+}
+
 void OLEDManager::updateDisplay() {
     if (!isAvailable()) return;
     
@@ -113,8 +122,8 @@ void OLEDManager::updateDisplay() {
     
     lastUpdate = millis();
     
-    // Show system info by default
-    showSystemInfo();
+    // Show clean default display
+    showDefaultDisplay();
 }
 
 void OLEDManager::drawHeader() {
@@ -155,10 +164,8 @@ void OLEDManager::drawSystemInfo() {
     
     int yPos = 15;
     
-    // Uptime
+    // Uptime - simplified format
     unsigned long uptime = millis();
-    unsigned long days = uptime / 86400000;
-    uptime %= 86400000;
     unsigned long hours = uptime / 3600000;
     uptime %= 3600000;
     unsigned long minutes = uptime / 60000;
@@ -167,18 +174,32 @@ void OLEDManager::drawSystemInfo() {
     
     display->setCursor(0, yPos);
     display->print("Uptime: ");
-    if (days > 0) display->print(days + "d ");
-    if (hours > 0 || days > 0) display->print(hours + "h ");
-    if (minutes > 0 || hours > 0 || days > 0) display->print(minutes + "m ");
-    display->print(seconds + "s");
+    if (hours > 0) {
+        display->print(hours);
+        display->print("h ");
+    }
+    display->print(minutes);
+    display->print("m ");
+    display->print(seconds);
+    display->print("s");
     yPos += 10;
     
-    // Free memory
+    // WiFi status
     display->setCursor(0, yPos);
-    display->print("RAM: ");
-    display->print(ESP.getFreeHeap());
-    display->print(" bytes");
+    display->print("WiFi: ");
+    if (WiFi.status() == WL_CONNECTED) {
+        display->print("Connected");
+    } else {
+        display->print("Disconnected");
+    }
     yPos += 10;
+    
+    // IP Address
+    if (WiFi.status() == WL_CONNECTED) {
+        display->setCursor(0, yPos);
+        display->print("IP: ");
+        display->print(WiFi.localIP().toString());
+    }
     
     // WiFi status
     display->setCursor(0, yPos);
@@ -291,5 +312,56 @@ void OLEDManager::drawI2CInfo() {
         display->print("Total: ");
         display->print(deviceCount);
         display->print(" devices");
+    }
+}
+
+void OLEDManager::drawDefaultInfo() {
+    display->setTextSize(1);
+    display->setTextColor(SSD1306_WHITE);
+    
+    int yPos = 15;
+    
+    // Clean uptime display
+    unsigned long uptime = millis();
+    unsigned long hours = uptime / 3600000;
+    uptime %= 3600000;
+    unsigned long minutes = uptime / 60000;
+    uptime %= 60000;
+    unsigned long seconds = uptime / 1000;
+    
+    display->setCursor(0, yPos);
+    display->print("Uptime: ");
+    if (hours > 0) {
+        display->print(hours);
+        display->print("h ");
+    }
+    display->print(minutes);
+    display->print("m ");
+    display->print(seconds);
+    display->print("s");
+    yPos += 12;
+    
+    // WiFi status
+    display->setCursor(0, yPos);
+    display->print("WiFi: ");
+    if (WiFi.status() == WL_CONNECTED) {
+        display->print("Connected");
+    } else {
+        display->print("Disconnected");
+    }
+    yPos += 12;
+    
+    // IP Address (only if connected)
+    if (WiFi.status() == WL_CONNECTED) {
+        display->setCursor(0, yPos);
+        display->print("IP: ");
+        display->print(WiFi.localIP().toString());
+        yPos += 12;
+        
+        // Signal strength
+        display->setCursor(0, yPos);
+        display->print("Signal: ");
+        display->print(WiFi.RSSI());
+        display->print(" dBm");
     }
 }

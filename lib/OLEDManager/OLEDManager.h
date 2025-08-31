@@ -15,6 +15,7 @@ public:
     static void showSystemInfo();
     static void showWiFiInfo();
     static void showI2CInfo();
+    static void showDefaultDisplay();
     static void updateDisplay();
     
 private:
@@ -28,6 +29,7 @@ private:
     static void drawSystemInfo();
     static void drawWiFiInfo();
     static void drawI2CInfo();
+    static void drawDefaultInfo();
 };
 
 #endif

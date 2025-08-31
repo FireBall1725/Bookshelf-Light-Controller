@@ -3,6 +3,7 @@
 #include "test_logger_simple.h"
 #include "test_logger_library.h"
 #include "test_firmware_updater_library.h"
+#include "test_oled_manager.h"
 
 void setUp(void) {
     // Setup code that runs before each test
@@ -62,6 +63,24 @@ int main(int argc, char **argv) {
     RUN_TEST(test_date_validation_logic);
     RUN_TEST(test_hex_validation_logic);
     RUN_TEST(test_firmware_info_formatting);
+    
+    // OLED Manager Tests - Testing OLED display functionality
+    RUN_TEST(test_oled_init_success);
+    RUN_TEST(test_oled_init_failure);
+    RUN_TEST(test_oled_availability);
+    RUN_TEST(test_oled_clear);
+    RUN_TEST(test_oled_show_status);
+    RUN_TEST(test_oled_show_system_info);
+    RUN_TEST(test_oled_show_wifi_info);
+    RUN_TEST(test_oled_show_i2c_info);
+    RUN_TEST(test_oled_show_default_display);
+    RUN_TEST(test_oled_update_display);
+    RUN_TEST(test_uptime_calculation);
+    RUN_TEST(test_wifi_status_connected);
+    RUN_TEST(test_wifi_status_disconnected);
+    RUN_TEST(test_i2c_communication_success);
+    RUN_TEST(test_i2c_communication_failure);
+    RUN_TEST(test_memory_management);
     
     // TODO: Add more library tests
     // ConfigManager Tests

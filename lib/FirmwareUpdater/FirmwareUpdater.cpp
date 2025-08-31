@@ -796,7 +796,11 @@ String FirmwareUpdater::getFirmwarePackageInfo(const String& filename) {
                     // Read metadata
                     packageFile = SPIFFS.open(filepath, "r");
                     packageFile.seek(9); // Skip magic + length
-                    String metadataJson = packageFile.readString();
+                    char* metadataBuffer = new char[metadataLength + 1];
+                    size_t bytesRead = packageFile.readBytes(metadataBuffer, metadataLength);
+                    metadataBuffer[bytesRead] = '\0'; // Null terminate
+                    String metadataJson = String(metadataBuffer);
+                    delete[] metadataBuffer;
                     packageFile.close();
                     
                     // Parse metadata
@@ -955,7 +959,11 @@ String FirmwareUpdater::getAllFirmwareInfo() {
                             // Read metadata
                             packageFile = SPIFFS.open(filepath, "r");
                             packageFile.seek(9); // Skip magic + length
-                            String metadataJson = packageFile.readString();
+                            char* metadataBuffer = new char[metadataLength + 1];
+                            size_t bytesRead = packageFile.readBytes(metadataBuffer, metadataLength);
+                            metadataBuffer[bytesRead] = '\0'; // Null terminate
+                            String metadataJson = String(metadataBuffer);
+                            delete[] metadataBuffer;
                             packageFile.close();
                             
                             // Parse metadata

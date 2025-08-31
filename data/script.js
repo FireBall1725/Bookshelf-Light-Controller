@@ -7,6 +7,13 @@ let firmwareDataTable = null; // DataTable instance
 
 // Initialize when page loads
 $(document).ready(function() {
+    // Remove any time-related status bars that might exist
+    $('.status').each(function() {
+        if ($(this).text().includes('Current Time')) {
+            $(this).remove();
+        }
+    });
+    
     refreshLog();
     // Add a small delay to ensure everything is ready before loading firmware table
     setTimeout(() => {

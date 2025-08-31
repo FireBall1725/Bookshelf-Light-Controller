@@ -45,18 +45,14 @@ jobs:
       run: |
         echo "Creating versioned firmware..."
         
-        # Get git hash and version
+        # Get git hash
         GIT_HASH=$(git rev-parse --short HEAD)
-        BASE_VERSION=$(grep 'FIRMWARE_VERSION' src/main.cpp | cut -d'"' -f2)
-        FULL_VERSION="${BASE_VERSION}-${GIT_HASH}"
-        
-        echo "Version: $FULL_VERSION"
         echo "Git hash: $GIT_HASH"
         
         # Copy and rename firmware
         if [ -f ".pio/build/esp32-c3-devkitc-02/firmware.bin" ]; then
-          cp ".pio/build/esp32-c3-devkitc-02/firmware.bin" "firmware-v${FULL_VERSION}.bin"
-          echo "Created firmware-v${FULL_VERSION}.bin"
+          cp ".pio/build/esp32-c3-devkitc-02/firmware.bin" "firmware-v1.0.0-${GIT_HASH}.bin"
+          echo "Created firmware-v1.0.0-${GIT_HASH}.bin"
         else
           echo "Firmware binary not found!"
           exit 1

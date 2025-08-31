@@ -119,16 +119,27 @@ function refreshFirmwareTable() {
     $.get('/firmware/all')
         .done(function(data) {
             console.log('Firmware data received:', data);
+            console.log('Data length:', data.length);
+            console.log('Data type:', typeof data);
+            console.log('Data contains "No firmware packages found":', data.includes('No firmware packages found'));
+            
+            if (data.includes('No firmware packages found')) {
+                console.log('No firmware found, this might be a timing issue');
+            }
+            
             populateFirmwareTable(data);
         })
         .fail(function(error) {
             console.error('Error refreshing firmware table:', error);
+            console.error('Error details:', error.responseText);
             // Don't show notification for automatic refresh on page load
         });
 }
 
 function populateFirmwareTable(firmwareData) {
     console.log('Populating firmware table with data:', firmwareData);
+    console.log('Data contains "No firmware packages found":', firmwareData.includes('No firmware packages found'));
+    console.log('Data contains "---":', firmwareData.includes('---'));
     
     if (firmwareData.includes('No firmware packages found')) {
         console.log('No firmware packages found, showing empty table');
@@ -453,9 +464,24 @@ function uploadFirmware() {
             uploadBtn.disabled = true;
             updateBtn.disabled = false;
             
-            // Auto-refresh the firmware table to show the new upload
-            console.log('Upload successful, calling refreshFirmwareTable()...');
-            refreshFirmwareTable();
+            // Auto-refresh the firmware table to show the new upload with retry mechanism
+            console.log('Upload successful, calling refreshFirmwareTable() with delay...');
+            setTimeout(() => {
+                console.log('First refresh attempt...');
+                refreshFirmwareTable();
+                
+                // Try again after 2 seconds in case file system needs time
+                setTimeout(() => {
+                    console.log('Second refresh attempt...');
+                    refreshFirmwareTable();
+                }, 2000);
+                
+                // Try one more time after 5 seconds
+                setTimeout(() => {
+                    console.log('Third refresh attempt...');
+                    refreshFirmwareTable();
+                }, 5000);
+            }, 1000);
             
             showNotification('Firmware uploaded to SPIFFS successfully!', 'success');
         } else {

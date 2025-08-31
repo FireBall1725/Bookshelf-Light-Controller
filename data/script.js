@@ -844,16 +844,20 @@ function showSystemLogModal() {
     }
     
     if (autoScrollStatus && logEntries) {
-        // Check if auto-scroll is enabled
-        if (logEntries.classList.contains('auto-scroll')) {
-            autoScrollStatus.textContent = 'ON';
-        } else {
-            autoScrollStatus.textContent = 'OFF';
-        }
+        // Enable auto-scroll by default and update status
+        logEntries.classList.add('auto-scroll');
+        autoScrollStatus.textContent = 'ON';
     }
     
     // Refresh log data specifically for the modal
     refreshLogForModal();
+    
+    // Auto-scroll to bottom after a short delay to ensure content is loaded
+    setTimeout(() => {
+        if (logEntries && logEntries.classList.contains('auto-scroll')) {
+            logEntries.scrollTop = logEntries.scrollHeight;
+        }
+    }, 100);
 }
 
 // Function to refresh log specifically for the modal

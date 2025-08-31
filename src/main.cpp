@@ -11,6 +11,7 @@
 #include "HomeAssistantMQTT.h"
 #include "ConfigManager.h"
 #include "WebHandler.h"
+#include "OLEDManager.h"
 
 // Firmware version and board information
 #define FIRMWARE_VERSION "1.0.0"
@@ -36,6 +37,9 @@ void setup() {
     I2CScanner::init();
     FirmwareUpdater::init();
     HomeAssistantMQTT::init();
+    
+    // Initialize OLED display if available
+    OLEDManager::init();
     
     // Startup sequence
     Logger::addEntry("ESP32 C3 Mini 1 Starting...");
@@ -160,6 +164,9 @@ void loop() {
     if (HomeAssistantMQTT::isConnected()) {
         // MQTT client handles its own loop internally
     }
+    
+    // Update OLED display
+    OLEDManager::updateDisplay();
     
     // Update uptime in log and publish to Home Assistant every 30 seconds
     static unsigned long lastUptimeLog = 0;

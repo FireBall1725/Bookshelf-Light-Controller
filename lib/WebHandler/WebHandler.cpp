@@ -32,6 +32,13 @@ void WebHandler::setupRoutes() {
     webServer->on("/update_i2c_pins", HTTP_POST, handleUpdateI2CPins);
     webServer->on("/reinit_i2c", HTTP_GET, handleReinitI2C);
     webServer->on("/i2ccmd", HTTP_GET, handleI2CCommand);
+    
+    // OLED display control endpoints
+    webServer->on("/oled/status", HTTP_GET, handleOLEDStatus);
+    webServer->on("/oled/system", HTTP_GET, handleOLEDSystem);
+    webServer->on("/oled/wifi", HTTP_GET, handleOLEDWiFi);
+    webServer->on("/oled/i2c", HTTP_GET, handleOLEDI2C);
+    webServer->on("/oled/clear", HTTP_GET, handleOLEDClear);
     webServer->on("/versioncheck", HTTP_GET, handleVersionCheck);
     webServer->on("/firmwareupload", HTTP_POST, []() {
         // Handle the POST request completion
@@ -583,4 +590,60 @@ void WebHandler::handleReinitI2C() {
     I2CScanner::init();
     
     webServer->send(200, "text/plain", "I2C bus reinitialized");
+}
+
+// OLED display handlers
+void WebHandler::handleOLEDStatus() {
+    Logger::addEntry("OLED status display requested");
+    
+    if (OLEDManager::isAvailable()) {
+        OLEDManager::showStatus("Web interface accessed");
+        webServer->send(200, "text/plain", "OLED status updated");
+    } else {
+        webServer->send(404, "text/plain", "OLED display not available");
+    }
+}
+
+void WebHandler::handleOLEDSystem() {
+    Logger::addEntry("OLED system info display requested");
+    
+    if (OLEDManager::isAvailable()) {
+        OLEDManager::showSystemInfo();
+        webServer->send(200, "text/plain", "OLED system info updated");
+    } else {
+        webServer->send(404, "text/plain", "OLED display not available");
+    }
+}
+
+void WebHandler::handleOLEDWiFi() {
+    Logger::addEntry("OLED WiFi info display requested");
+    
+    if (OLEDManager::isAvailable()) {
+        OLEDManager::showWiFiInfo();
+        webServer->send(200, "text/plain", "OLED WiFi info updated");
+    } else {
+        webServer->send(404, "text/plain", "OLED display not available");
+    }
+}
+
+void WebHandler::handleOLEDI2C() {
+    Logger::addEntry("OLED I2C info display requested");
+    
+    if (OLEDManager::isAvailable()) {
+        OLEDManager::showI2CInfo();
+        webServer->send(200, "text/plain", "OLED I2C info updated");
+    } else {
+        webServer->send(404, "text/plain", "OLED display not available");
+    }
+}
+
+void WebHandler::handleOLEDClear() {
+    Logger::addEntry("OLED clear display requested");
+    
+    if (OLEDManager::isAvailable()) {
+        OLEDManager::clear();
+        webServer->send(200, "text/plain", "OLED display cleared");
+    } else {
+        webServer->send(404, "text/plain", "OLED display not available");
+    }
 }

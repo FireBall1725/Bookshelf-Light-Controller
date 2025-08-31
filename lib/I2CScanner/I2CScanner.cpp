@@ -1,9 +1,9 @@
 #include "I2CScanner.h"
 #include "Logger.h"
 
-// Initialize with default ESP32-C3-DevKitC-02 I2C pins
-int I2CScanner::SDA_PIN = 8;  // Default SDA pin for ESP32-C3
-int I2CScanner::SCL_PIN = 10; // Default SCL pin for ESP32-C3
+// Initialize with correct I2C pins
+int I2CScanner::SDA_PIN = 6;  // SDA pin
+int I2CScanner::SCL_PIN = 7;  // SCL pin
 
 void I2CScanner::init() {
     init(SDA_PIN, SCL_PIN);
@@ -14,18 +14,8 @@ void I2CScanner::init(int sdaPin, int sclPin) {
     SCL_PIN = sclPin;
     
     Wire.begin(SDA_PIN, SCL_PIN);
-    Wire.setClock(100000); // Set to 100kHz for better compatibility
     
     Logger::addEntry("I2C initialized on SDA:GPIO" + String(SDA_PIN) + ", SCL:GPIO" + String(SCL_PIN));
-    Logger::addEntry("I2C clock speed set to 100kHz");
-    
-    // Test I2C bus with a simple scan
-    Logger::addEntry("Testing I2C bus...");
-    int testCount = 0;
-    for (byte addr = 1; addr < 10; addr++) {
-        if (testAddress(addr)) testCount++;
-    }
-    Logger::addEntry("Quick test scan found " + String(testCount) + " devices in low address range");
 }
 
 String I2CScanner::scan() {

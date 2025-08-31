@@ -111,6 +111,67 @@ function sendI2CCommand(command) {
         });
 }
 
+// OLED Display Control Functions
+function showOLEDStatus() {
+    $.get('/oled/status')
+        .done(function(data) {
+            console.log('OLED status updated:', data);
+            showNotification('OLED status updated', 'success');
+        })
+        .fail(function(error) {
+            console.error('Error updating OLED status:', error);
+            showNotification('Failed to update OLED status', 'error');
+        });
+}
+
+function showOLEDSystem() {
+    $.get('/oled/system')
+        .done(function(data) {
+            console.log('OLED system info updated:', data);
+            showNotification('OLED system info updated', 'success');
+        })
+        .fail(function(error) {
+            console.error('Error updating OLED system info:', error);
+            showNotification('Failed to update OLED system info', 'error');
+        });
+}
+
+function showOLEDWiFi() {
+    $.get('/oled/wifi')
+        .done(function(data) {
+            console.log('OLED WiFi info updated:', data);
+            showNotification('OLED WiFi info updated', 'success');
+        })
+        .fail(function(error) {
+            console.error('Error updating OLED WiFi info:', error);
+            showNotification('Failed to update OLED WiFi info', 'error');
+        });
+}
+
+function showOLEDI2C() {
+    $.get('/oled/i2c')
+        .done(function(data) {
+            console.log('OLED I2C info updated:', data);
+            showNotification('OLED I2C info updated', 'success');
+        })
+        .fail(function(error) {
+            console.error('Error updating OLED I2C info:', error);
+            showNotification('Failed to update OLED I2C info', 'error');
+        });
+}
+
+function clearOLED() {
+    $.get('/oled/clear')
+        .done(function(data) {
+            console.log('OLED display cleared:', data);
+            showNotification('OLED display cleared', 'success');
+        })
+        .fail(function(error) {
+            console.error('Error clearing OLED display:', error);
+            showNotification('Failed to clear OLED display', 'error');
+        });
+}
+
 // Firmware Management Functions
 // Note: These functions are no longer used but kept for potential future use
 

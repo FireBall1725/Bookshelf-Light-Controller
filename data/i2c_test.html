@@ -94,34 +94,34 @@
     <div class="container">
         <h2>📌 Pin Configuration</h2>
         <div class="pin-config">
-            <div class="pin-input">
-                <label for="sdaPin">SDA Pin:</label>
-                <select id="sdaPin">
-                    <option value="8" selected>GPIO 8 (Default for ESP32-C3)</option>
-                    <option value="4">GPIO 4</option>
-                    <option value="5">GPIO 5</option>
-                    <option value="6">GPIO 6</option>
-                    <option value="7">GPIO 7</option>
-                    <option value="9">GPIO 9</option>
-                    <option value="10">GPIO 10</option>
-                    <option value="11">GPIO 11</option>
-                    <option value="12">GPIO 12</option>
-                </select>
-            </div>
-            <div class="pin-input">
-                <label for="sclPin">SCL Pin:</label>
-                <select id="sclPin">
-                    <option value="10" selected>GPIO 10 (Default for ESP32-C3)</option>
-                    <option value="4">GPIO 4</option>
-                    <option value="5">GPIO 5</option>
-                    <option value="6">GPIO 6</option>
-                    <option value="7">GPIO 7</option>
-                    <option value="8">GPIO 8</option>
-                    <option value="9">GPIO 9</option>
-                    <option value="11">GPIO 11</option>
-                    <option value="12">GPIO 12</option>
-                </select>
-            </div>
+                            <div class="pin-input">
+                    <label for="sdaPin">SDA Pin:</label>
+                    <select id="sdaPin">
+                        <option value="6" selected>GPIO 6 (Current SDA)</option>
+                        <option value="4">GPIO 4</option>
+                        <option value="5">GPIO 5</option>
+                        <option value="7">GPIO 7</option>
+                        <option value="8">GPIO 8</option>
+                        <option value="9">GPIO 9</option>
+                        <option value="10">GPIO 10</option>
+                        <option value="11">GPIO 11</option>
+                        <option value="12">GPIO 12</option>
+                    </select>
+                </div>
+                <div class="pin-input">
+                    <label for="sclPin">SCL Pin:</label>
+                    <select id="sclPin">
+                        <option value="7" selected>GPIO 7 (Current SCL)</option>
+                        <option value="4">GPIO 4</option>
+                        <option value="5">GPIO 5</option>
+                        <option value="6">GPIO 6</option>
+                        <option value="8">GPIO 8</option>
+                        <option value="9">GPIO 9</option>
+                        <option value="10">GPIO 10</option>
+                        <option value="11">GPIO 11</option>
+                        <option value="12">GPIO 12</option>
+                    </select>
+                </div>
         </div>
         <button onclick="updatePins()">Update I2C Pins</button>
         <button onclick="reinitializeI2C()">Reinitialize I2C</button>

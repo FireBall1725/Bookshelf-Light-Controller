@@ -72,6 +72,19 @@
             </div>
         </div>
         
+        <!-- OLED Display Control Section -->
+        <div class="oled-section">
+            <h3>OLED Display Control</h3>
+            <p>Control the OLED display (if detected at address 0x3C):</p>
+            <div class="oled-grid">
+                <button class="oled-btn" onclick="showOLEDStatus()">Show Status</button>
+                <button class="oled-btn" onclick="showOLEDSystem()">System Info</button>
+                <button class="oled-btn" onclick="showOLEDWiFi()">WiFi Info</button>
+                <button class="oled-btn" onclick="showOLEDI2C()">I2C Info</button>
+                <button class="oled-btn" onclick="clearOLED()">Clear Display</button>
+            </div>
+        </div>
+        
         <!-- Firmware Update Section -->
         <div class="firmware-section">
             <h3>ATtiny1616 Firmware Update</h3>

@@ -1,0 +1,23 @@
+{
+  "name": "OLEDManager",
+  "version": "1.0.0",
+  "description": "OLED display manager for ESP32 with SSD1306/SH1106 displays",
+  "keywords": "oled, display, ssd1306, sh1106, esp32",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/OLEDManager.git"
+  },
+  "authors": [
+    {
+      "name": "FireLabs",
+      "email": "info@firelabs.com"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "adafruit/Adafruit SSD1306": "^2.5.0",
+    "adafruit/Adafruit GFX Library": "^1.11.0"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32"
+}

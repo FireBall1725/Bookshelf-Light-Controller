@@ -9,6 +9,7 @@
 #include "Logger.h"
 #include "LEDController.h"
 #include "I2CScanner.h"
+#include "OLEDManager.h"
 
 class WebHandler {
 public:
@@ -55,6 +56,13 @@ public:
     static void handleI2CTestCommon();
     static void handleUpdateI2CPins();
     static void handleReinitI2C();
+    
+    // OLED display handlers
+    static void handleOLEDStatus();
+    static void handleOLEDSystem();
+    static void handleOLEDWiFi();
+    static void handleOLEDI2C();
+    static void handleOLEDClear();
     
     // API endpoints for configuration
     static void handleAPIConfig();

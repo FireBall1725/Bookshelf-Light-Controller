@@ -841,8 +841,8 @@ function showSystemLogModal() {
     const modal = document.getElementById('systemLogModal');
     modal.style.display = 'block';
     
-    // Refresh log data
-    refreshLog();
+    // Refresh log data specifically for the modal
+    refreshLogForModal();
     
     // Update modal status elements
     if (document.getElementById('modalAutoRefreshStatus')) {
@@ -852,6 +852,77 @@ function showSystemLogModal() {
     if (document.getElementById('modalAutoScrollStatus')) {
         document.getElementById('modalAutoScrollStatus').textContent = 
             document.getElementById('autoScrollStatus')?.textContent || 'ON';
+    }
+}
+
+// Function to refresh log specifically for the modal
+function refreshLogForModal() {
+    fetch('/log')
+        .then(response => response.text())
+        .then(data => {
+            const logEntries = document.getElementById('modalLogEntries');
+            if (logEntries) {
+                logEntries.innerHTML = formatLogData(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching log:', error);
+            const logEntries = document.getElementById('modalLogEntries');
+            if (logEntries) {
+                logEntries.innerHTML = 'Error loading log: ' + error.message;
+            }
+        });
+}
+
+// Function to clear log specifically for the modal
+function clearLogForModal() {
+    fetch('/log/clear', { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+            console.log('Log cleared:', data);
+            refreshLogForModal();
+            showNotification('Log cleared successfully', 'success');
+        })
+        .catch(error => {
+            console.error('Error clearing log:', error);
+            showNotification('Failed to clear log', 'error');
+        });
+}
+
+// Function to toggle auto-refresh specifically for the modal
+function autoRefreshForModal() {
+    const statusElement = document.getElementById('modalAutoRefreshStatus');
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        if (statusElement) {
+            statusElement.textContent = 'OFF';
+        }
+        showNotification('Auto-refresh disabled', 'info');
+    } else {
+        autoRefreshInterval = setInterval(refreshLogForModal, 2000);
+        if (statusElement) {
+            statusElement.textContent = 'ON (2s)';
+        }
+        showNotification('Auto-refresh enabled (2s)', 'success');
+    }
+}
+
+// Function to toggle auto-scroll specifically for the modal
+function toggleAutoScrollForModal() {
+    const logEntries = document.getElementById('modalLogEntries');
+    const statusElement = document.getElementById('modalAutoScrollStatus');
+    
+    if (logEntries && statusElement) {
+        if (logEntries.classList.contains('auto-scroll')) {
+            logEntries.classList.remove('auto-scroll');
+            statusElement.textContent = 'OFF';
+            showNotification('Auto-scroll disabled', 'info');
+        } else {
+            logEntries.classList.add('auto-scroll');
+            statusElement.textContent = 'ON';
+            showNotification('Auto-scroll enabled', 'success');
+        }
     }
 }
 

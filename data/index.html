@@ -173,11 +173,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="log-controls">
-                        <button onclick="refreshLog()" class="control-btn">Refresh Log</button>
-                        <button onclick="clearLog()" class="control-btn">Clear Log</button>
+                        <button onclick="refreshLogForModal()" class="control-btn">Refresh Log</button>
+                        <button onclick="clearLogForModal()" class="control-btn">Clear Log</button>
                         <button onclick="scanI2C()" class="control-btn">Scan I2C</button>
-                        <button onclick="autoRefresh()" class="control-btn">Auto-refresh: <span id="modalAutoRefreshStatus">OFF</span></button>
-                        <button onclick="toggleAutoScroll()" class="control-btn">Auto-scroll: <span id="modalAutoScrollStatus">ON</span></button>
+                        <button onclick="autoRefreshForModal()" class="control-btn">Auto-refresh: <span id="modalAutoRefreshStatus">OFF</span></button>
+                        <button onclick="toggleAutoScrollForModal()" class="control-btn">Auto-scroll: <span id="modalAutoScrollStatus">ON</span></button>
                     </div>
                     <div id="modalLogEntries" class="log-entries">Loading log...</div>
                 </div>

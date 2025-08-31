@@ -1,7 +1,6 @@
 // Global variables
 console.log('Script.js loaded successfully!');
 let autoRefreshInterval = null;
-let modalAutoRefreshInterval = null; // Separate auto-refresh for modal
 let selectedFile = null;
 let firmwareData = null;
 let firmwareDataTable = null; // DataTable instance
@@ -836,8 +835,9 @@ function showSystemLogModal() {
     const logEntries = document.getElementById('modalLogEntries');
     
     if (autoRefreshStatus) {
-        // Always start with OFF status for modal auto-refresh
-        autoRefreshStatus.textContent = 'OFF';
+        // Enable auto-refresh by default and update status
+        modalAutoRefreshInterval = setInterval(refreshLogForModal, 2000);
+        autoRefreshStatus.textContent = 'ON (2s)';
     }
     
     if (autoScrollStatus && logEntries) {

@@ -862,7 +862,13 @@ function refreshLogForModal() {
         .then(data => {
             const logEntries = document.getElementById('modalLogEntries');
             if (logEntries) {
+                // Use the same formatting function as the main page
                 logEntries.innerHTML = formatLogData(data);
+                
+                // Apply auto-scroll if enabled
+                if (logEntries.classList.contains('auto-scroll')) {
+                    logEntries.scrollTop = logEntries.scrollHeight;
+                }
             }
         })
         .catch(error => {

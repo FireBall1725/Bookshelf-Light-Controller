@@ -907,12 +907,14 @@ bool FirmwareUpdater::checkDuplicateFirmware(const String& version, const String
 }
 
 String FirmwareUpdater::getAllFirmwareInfo() {
+    Logger::addEntry("getAllFirmwareInfo called");
     String info = "";
     bool foundFiles = false;
     
     // Scan SPIFFS for all .bin files
     File root = SPIFFS.open("/");
     if (!root) {
+        Logger::addEntry("Failed to open SPIFFS root");
         return "Failed to open SPIFFS root";
     }
     

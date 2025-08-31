@@ -49,8 +49,8 @@ void HomeAssistantMQTT::publishDeviceInfo() {
     DynamicJsonDocument doc(1024);
     doc["identifiers"] = config.deviceId;
     doc["name"] = config.deviceName;
-    doc["manufacturer"] = "ESP32";
-    doc["model"] = "ESP32-C3-Mini";
+    doc["manufacturer"] = "FireLabs";
+    doc["model"] = "FL-LEDController01";
     
     String deviceInfo;
     serializeJson(doc, deviceInfo);

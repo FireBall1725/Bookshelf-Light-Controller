@@ -498,6 +498,8 @@ void WebHandler::handleFirmwarePackageDelete() {
 }
 
 void WebHandler::handleAllFirmware() {
+    Logger::addEntry("handleAllFirmware called");
     String allFirmwareInfo = FirmwareUpdater::getAllFirmwareInfo();
+    Logger::addEntry("getAllFirmwareInfo returned: " + allFirmwareInfo.substring(0, 100) + "...");
     webServer->send(200, "text/plain", allFirmwareInfo);
 }

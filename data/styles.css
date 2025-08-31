@@ -696,3 +696,154 @@ h1 i {
         font-size: 0.7em;
     }
 }
+
+/* Firmware Modal Styles */
+.firmware-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.firmware-modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.firmware-modal-header {
+    background: linear-gradient(45deg, #007cba, #005a87);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.firmware-modal-header h3 {
+    margin: 0;
+    color: white;
+    border: none;
+    font-size: 1.2em;
+}
+
+.firmware-modal-header h3 i {
+    margin-right: 10px;
+    color: white;
+}
+
+.firmware-modal-close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.firmware-modal-close:hover {
+    color: #ff6b6b;
+    transform: scale(1.1);
+}
+
+.firmware-modal-body {
+    padding: 25px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* DataTables Custom Styling */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin: 15px 0;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 8px 12px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #3498db;
+    color: white !important;
+    border-color: #3498db;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #3498db;
+    color: white !important;
+    border-color: #3498db;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    color: #999 !important;
+    cursor: not-allowed;
+}
+
+/* Mobile responsive DataTables */
+@media (max-width: 768px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: center;
+        margin: 10px 0;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .firmware-modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .firmware-modal-header {
+        padding: 15px;
+    }
+    
+    .firmware-modal-body {
+        padding: 20px;
+    }
+}

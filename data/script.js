@@ -3,6 +3,7 @@ console.log('Script.js loaded successfully!');
 let autoRefreshInterval = null;
 let selectedFile = null;
 let firmwareData = null;
+let firmwareDataTable = null; // DataTable instance
 
 // Initialize when page loads
 $(document).ready(function() {
@@ -112,11 +113,13 @@ function refreshFirmwareTable() {
 
 function populateFirmwareTable(firmwareData) {
     console.log('Populating firmware table with data:', firmwareData);
-    const $tbody = $('#firmwareTableBody');
     
     if (firmwareData.includes('No firmware packages found')) {
         console.log('No firmware packages found, showing empty table');
-        $tbody.html('<tr><td colspan="6">No firmware packages found</td></tr>');
+        if (firmwareDataTable) {
+            firmwareDataTable.destroy();
+        }
+        $('#firmwareTableBody').html('<tr><td colspan="6">No firmware packages found</td></tr>');
         return;
     }
     
@@ -129,9 +132,8 @@ function populateFirmwareTable(firmwareData) {
         packages = [firmwareData];
     }
     
-    // Clear existing content
-    $tbody.empty();
-    
+    // Prepare data for DataTable
+    const tableData = [];
     packages.forEach((package, index) => {
         if (package.trim() === '') return;
         
@@ -167,34 +169,57 @@ function populateFirmwareTable(firmwareData) {
             }
         }
         
-        // Create main row
-        const mainRow = document.createElement('tr');
-        mainRow.innerHTML = `
-            <td>${filename}</td>
-            <td>${displaySize}</td>
-            <td>${version}</td>
-            <td>${board}</td>
-            <td>${buildDate}</td>
-            <td>
-                <button class="action-btn info" onclick="toggleFirmwareInfo('${filename}', ${index})" title="Toggle Info"><i class="fas fa-info-circle"></i></button>
-                <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete"><i class="fas fa-trash"></i></button>
-            </td>
-        `;
-        tbody.appendChild(mainRow);
-        
-        // Create expandable row (initially hidden)
-        const expandableRow = document.createElement('tr');
-        expandableRow.className = 'expandable-row';
-        expandableRow.id = `expandable-${index}`;
-        expandableRow.style.display = 'none';
-        expandableRow.innerHTML = `
-            <td colspan="6">
-                <div class="firmware-features">
-                    <div class="firmware-feature">Loading features...</div>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(expandableRow);
+        // Add to table data array with row index for expandable functionality
+        tableData.push([
+            filename,
+            displaySize,
+            version,
+            board,
+            buildDate,
+            `<button class="action-btn info" onclick="toggleFirmwareInfo('${filename}', ${index})" title="Toggle Info"><i class="fas fa-info-circle"></i></button>
+             <button class="action-btn delete" onclick="deleteFirmware('${filename}')" title="Delete"><i class="fas fa-trash"></i></button>`
+        ]);
+    });
+    
+    // Destroy existing DataTable if it exists
+    if (firmwareDataTable) {
+        firmwareDataTable.destroy();
+    }
+    
+    // Initialize DataTable with custom sorting
+    firmwareDataTable = $('#firmwareTable').DataTable({
+        data: tableData,
+        columns: [
+            { title: 'Filename' },
+            { title: 'Size' },
+            { title: 'Version' },
+            { title: 'Board' },
+            { title: 'Build Date' },
+            { title: 'Actions', orderable: false }
+        ],
+        order: [
+            [3, 'asc'],  // Board (device type) first
+            [2, 'desc']  // Version second (newest first)
+        ],
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
+        responsive: true,
+        language: {
+            search: "Search firmware:",
+            lengthMenu: "Show _MENU_ entries per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ firmware packages",
+            paginate: {
+                first: "First",
+                previous: "Previous",
+                next: "Next",
+                last: "Last"
+            }
+        },
+        dom: '<"top"lf>rt<"bottom"ip><"clear">',
+        initComplete: function() {
+            // Add custom styling after table is initialized
+            this.api().columns.adjust();
+        }
     });
 }
 
@@ -214,38 +239,56 @@ function deleteFirmware(filename) {
 }
 
 function toggleFirmwareInfo(filename, index) {
-    const expandableRow = document.getElementById(`expandable-${index}`);
-    const isVisible = expandableRow.style.display !== 'none';
-    
-    if (isVisible) {
-        // Hide the row
-        expandableRow.style.display = 'none';
-    } else {
-        // Show the row and load real metadata from the .bin file
-        expandableRow.style.display = 'table-row';
-        loadFirmwareMetadata(filename, index);
-    }
+    // For DataTables, we'll show the info in a modal or expand the row
+    // For now, let's load and display the metadata directly
+    loadFirmwareMetadata(filename, index);
 }
 
 function loadFirmwareMetadata(filename, index) {
-    const expandableRow = document.getElementById(`expandable-${index}`);
-    const featuresContainer = expandableRow.querySelector('.firmware-features');
-    
-    // Show loading state
-    featuresContainer.innerHTML = '<div class="firmware-feature">Loading features...</div>';
-    
+    // For DataTables, we'll show the info in a notification or alert
     // Fetch the actual firmware package info to get real metadata
-    fetch(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
-        .then(response => response.text())
-        .then(data => {
+    $.get(`/firmware/package/info?filename=${encodeURIComponent(filename)}`)
+        .done(function(data) {
             // Parse the real metadata from the .bin file
             const features = parseRealFirmwareMetadata(data, filename);
-            displayFirmwareFeatures(features, featuresContainer);
+            showFirmwareInfoModal(features, filename);
         })
-        .catch(error => {
+        .fail(function(error) {
             console.error('Error loading firmware metadata:', error);
-            featuresContainer.innerHTML = '<div class="firmware-feature error">Failed to load features</div>';
+            showNotification('Failed to load firmware features', 'error');
         });
+}
+
+function showFirmwareInfoModal(features, filename) {
+    // Create a modal to display firmware information
+    const modalHtml = `
+        <div id="firmwareModal" class="firmware-modal">
+            <div class="firmware-modal-content">
+                <div class="firmware-modal-header">
+                    <h3><i class="fas fa-info-circle"></i> Firmware Information: ${filename}</h3>
+                    <span class="firmware-modal-close" onclick="closeFirmwareModal()">&times;</span>
+                </div>
+                <div class="firmware-modal-body">
+                    ${features}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    $('.firmware-modal').remove();
+    
+    // Add modal to body
+    $('body').append(modalHtml);
+    
+    // Show modal
+    $('#firmwareModal').fadeIn(300);
+}
+
+function closeFirmwareModal() {
+    $('#firmwareModal').fadeOut(300, function() {
+        $(this).remove();
+    });
 }
 
 function parseRealFirmwareMetadata(infoText, filename) {

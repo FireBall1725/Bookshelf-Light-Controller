@@ -15,20 +15,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Full history for git hash
+        fetch-depth: 0
     
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
     
     - name: Install PlatformIO
       run: |
@@ -48,88 +40,65 @@ jobs:
         echo "Running unit tests..."
         pio test -e native
     
-    - name: Create release assets
+    - name: Create versioned firmware
       if: github.ref == 'refs/heads/main'
       run: |
-        echo "Creating release assets..."
+        echo "Creating versioned firmware..."
         
-        # Get git hash for versioning
+        # Get git hash and version
         GIT_HASH=$(git rev-parse --short HEAD)
+        BASE_VERSION=$(grep 'FIRMWARE_VERSION' src/main.cpp | sed 's/.*"\([^"]*\)".*/\1/')
+        FULL_VERSION="${BASE_VERSION}-${GIT_HASH}"
+        
+        echo "Version: $FULL_VERSION"
         echo "Git hash: $GIT_HASH"
         
-        # Get base version from source
-        BASE_VERSION=$(grep 'FIRMWARE_VERSION' src/main.cpp | sed 's/.*"\([^"]*\)".*/\1/')
-        echo "Base version: $BASE_VERSION"
-        
-        # Create version with git hash
-        FULL_VERSION="${BASE_VERSION}-${GIT_HASH}"
-        echo "Full version: $FULL_VERSION"
-        
-        # Create firmware filename
-        FIRMWARE_NAME="firmware-v${FULL_VERSION}.bin"
-        echo "Firmware name: $FIRMWARE_NAME"
-        
-        # Copy built firmware to project root with versioned name
+        # Copy and rename firmware
         if [ -f ".pio/build/esp32-c3-devkitc-02/firmware.bin" ]; then
-          cp ".pio/build/esp32-c3-devkitc-02/firmware.bin" "$FIRMWARE_NAME"
-          echo "✅ Created $FIRMWARE_NAME"
+          cp ".pio/build/esp32-c3-devkitc-02/firmware.bin" "firmware-v${FULL_VERSION}.bin"
+          echo "Created firmware-v${FULL_VERSION}.bin"
         else
-          echo "❌ Firmware binary not found!"
+          echo "Firmware binary not found!"
           exit 1
         fi
-        
-        # Create metadata file with build info
-        cat > "firmware-${FULL_VERSION}.meta" << EOF
-{
-  "firmware": {
-    "version": "${FULL_VERSION}",
-    "description": "FireLabs I2C Bookshelf RGBCCT Light Controller",
-    "board": "FL-LC01"
-  },
-  "target": {
-    "board": "ESP32-C3-DevKitC-02",
-    "platform": "espressif32",
-    "framework": "arduino",
-    "upload_protocol": "esptool"
-  },
-  "build_info": {
-    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%S.000000Z")",
-    "git_hash": "${GIT_HASH}",
-    "git_commit": "$(git log -1 --pretty=format:'%s')",
-    "github_run_id": "${{ github.run_id }}",
-    "platformio_version": "$(pio --version | head -n1)"
-  },
-  "features": [
-    "WiFi connectivity with WiFiManager",
-    "Web-based configuration interface",
-    "I2C communication for LED control",
-    "SPIFFS file system for data storage",
-    "Home Assistant MQTT integration",
-    "Firmware update capability",
-    "RGB+CCT LED control",
-    "Configuration management"
-  ]
-}
-EOF
-        
-        echo "✅ Created firmware-${FULL_VERSION}.meta"
     
     - name: Upload firmware artifacts
       if: github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@v3
       with:
         name: firmware-${{ github.sha }}
-        path: firmware-v*.bin, firmware-*.meta
+        path: firmware-v*.bin
         retention-days: 30
     
     - name: Create GitHub Release
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
-        files: firmware-v*.bin, firmware-*.meta
+        files: firmware-v*.bin
         tag_name: v${{ github.sha }}
         name: Firmware Build ${{ github.sha }}
-        body: "## Firmware Release\n\n**Build Info:**\n- Git Hash: ${{ github.sha }}\n- Build Date: ${{ github.event.head_commit.timestamp }}\n- Commit Message: ${{ github.event.head_commit.message }}\n\n**Features:**\n- WiFi connectivity with WiFiManager\n- Web-based configuration interface\n- I2C communication for LED control\n- SPIFFS file system for data storage\n- Home Assistant MQTT integration\n- Firmware update capability\n- RGB+CCT LED control\n- Configuration management\n\n**Installation:**\n1. Download the firmware binary\n2. Use ESP32 flash tool to upload\n3. Configure WiFi and settings via web interface\n\n**Changes:**\n${{ github.event.head_commit.message }}"
+        body: |
+          ## Firmware Release
+          
+          **Build Info:**
+          - Git Hash: ${{ github.sha }}
+          - Build Date: ${{ github.event.head_commit.timestamp }}
+          - Commit Message: ${{ github.event.head_commit.message }}
+          
+          **Features:**
+          - WiFi connectivity with WiFiManager
+          - Web-based configuration interface
+          - I2C communication for LED control
+          - SPIFFS file system for data storage
+          - Home Assistant MQTT integration
+          - Firmware update capability
+          - RGB+CCT LED control
+          - Configuration management
+          
+          **Installation:**
+          1. Download the firmware binary
+          2. Use ESP32 flash tool to upload
+          3. Configure WiFi and settings via web interface
         draft: false
         prerelease: false
       env:

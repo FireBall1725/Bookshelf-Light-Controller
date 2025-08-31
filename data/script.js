@@ -562,12 +562,62 @@ function refreshLog() {
     fetch('/log')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('logEntries').innerHTML = data;
+            // Format the log data to be readable with proper line breaks
+            const formattedLog = formatLogData(data);
+            document.getElementById('logEntries').innerHTML = formattedLog;
         })
         .catch(error => {
             console.error('Error refreshing log:', error);
             document.getElementById('logEntries').innerHTML = '<div class="log-entry">Error loading log</div>';
         });
+}
+
+function formatLogData(logData) {
+    if (!logData || logData.trim() === '') {
+        return '<div class="log-entry">No log entries found</div>';
+    }
+    
+    // Try to split by timestamp patterns first
+    const timestampPattern = /(\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\])/g;
+    const parts = logData.split(timestampPattern);
+    
+    let formattedHtml = '';
+    let currentEntry = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (part === '') continue;
+        
+        if (part.match(/^\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\]$/)) {
+            // This is a timestamp, start a new log entry
+            if (currentEntry !== '') {
+                // Close the previous entry if it exists
+                formattedHtml += '<span class="log-message">' + currentEntry + '</span></div>';
+            }
+            formattedHtml += '<div class="log-entry"><span class="log-timestamp">' + part + '</span>';
+            currentEntry = '';
+        } else if (part.length > 0) {
+            // This is log message content
+            currentEntry += part;
+        }
+    }
+    
+    // Close the last entry if it exists
+    if (currentEntry !== '') {
+        formattedHtml += '<span class="log-message">' + currentEntry + '</span></div>';
+    }
+    
+    // If no proper formatting was applied, fall back to simple line splitting
+    if (formattedHtml === '') {
+        const lines = logData.split('\n');
+        lines.forEach(line => {
+            if (line.trim() !== '') {
+                formattedHtml += '<div class="log-entry">' + line + '</div>';
+            }
+        });
+    }
+    
+    return formattedHtml;
 }
 
 function clearLog() {

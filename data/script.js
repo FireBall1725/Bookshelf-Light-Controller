@@ -829,18 +829,31 @@ function showSystemLogModal() {
     const modal = document.getElementById('systemLogModal');
     modal.style.display = 'block';
     
+    // Initialize modal status elements with default values
+    const autoRefreshStatus = document.getElementById('modalAutoRefreshStatus');
+    const autoScrollStatus = document.getElementById('modalAutoScrollStatus');
+    const logEntries = document.getElementById('modalLogEntries');
+    
+    if (autoRefreshStatus) {
+        // Check if auto-refresh is currently running
+        if (autoRefreshInterval) {
+            autoRefreshStatus.textContent = 'ON (2s)';
+        } else {
+            autoRefreshStatus.textContent = 'OFF';
+        }
+    }
+    
+    if (autoScrollStatus && logEntries) {
+        // Check if auto-scroll is enabled
+        if (logEntries.classList.contains('auto-scroll')) {
+            autoScrollStatus.textContent = 'ON';
+        } else {
+            autoScrollStatus.textContent = 'OFF';
+        }
+    }
+    
     // Refresh log data specifically for the modal
     refreshLogForModal();
-    
-    // Update modal status elements
-    if (document.getElementById('modalAutoRefreshStatus')) {
-        document.getElementById('modalAutoRefreshStatus').textContent = 
-            document.getElementById('autoRefreshStatus')?.textContent || 'OFF';
-    }
-    if (document.getElementById('modalAutoScrollStatus')) {
-        document.getElementById('modalAutoScrollStatus').textContent = 
-            document.getElementById('autoScrollStatus')?.textContent || 'ON';
-    }
 }
 
 // Function to refresh log specifically for the modal
@@ -851,6 +864,11 @@ function refreshLogForModal() {
             const logEntries = document.getElementById('modalLogEntries');
             if (logEntries) {
                 logEntries.innerHTML = formatLogData(data);
+                
+                // Apply auto-scroll if enabled
+                if (logEntries.classList.contains('auto-scroll')) {
+                    logEntries.scrollTop = logEntries.scrollHeight;
+                }
             }
         })
         .catch(error => {

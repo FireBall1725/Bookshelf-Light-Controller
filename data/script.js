@@ -562,13 +562,13 @@ function refreshLog() {
     fetch('/log')
         .then(response => response.text())
         .then(data => {
-            // Format the log data to be readable with proper line breaks
-            const formattedLog = formatLogData(data);
+            // Format the log data to look like a Linux tail -f log
+            const formattedLog = formatLogDataLinux(data);
             document.getElementById('logEntries').innerHTML = formattedLog;
         })
         .catch(error => {
             console.error('Error refreshing log:', error);
-            document.getElementById('logEntries').innerHTML = '<div class="log-entry">Error loading log</div>';
+            document.getElementById('logEntries').innerHTML = '<div class="log-line">Error loading log</div>';
         });
 }
 
@@ -620,6 +620,54 @@ function formatLogData(logData) {
     return formattedHtml;
 }
 
+function formatLogDataLinux(logData) {
+    if (!logData || logData.trim() === '') {
+        return '<div class="log-line">No log entries found</div>';
+    }
+    
+    // Try to split by timestamp patterns first
+    const timestampPattern = /(\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\])/g;
+    const parts = logData.split(timestampPattern);
+    
+    let formattedHtml = '';
+    let currentEntry = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i].trim();
+        if (part === '') continue;
+        
+        if (part.match(/^\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\]$/)) {
+            // This is a timestamp, start a new log entry
+            if (currentEntry !== '') {
+                // Close the previous entry if it exists
+                formattedHtml += currentEntry + '</div>';
+            }
+            formattedHtml += '<div class="log-line"><span class="log-time">' + part + '</span> ';
+            currentEntry = '';
+        } else if (part.length > 0) {
+            // This is log message content
+            currentEntry += part;
+        }
+    }
+    
+    // Close the last entry if it exists
+    if (currentEntry !== '') {
+        formattedHtml += currentEntry + '</div>';
+    }
+    
+    // If no proper formatting was applied, fall back to simple line splitting
+    if (formattedHtml === '') {
+        const lines = logData.split('\n');
+        lines.forEach(line => {
+            if (line.trim() !== '') {
+                formattedHtml += '<div class="log-line">' + line + '</div>';
+            }
+        });
+    }
+    
+    return formattedHtml;
+}
+
 function clearLog() {
     fetch('/clearlog')
         .then(response => response.text())
@@ -635,15 +683,18 @@ function clearLog() {
 
 function autoRefresh() {
     const autoRefreshStatus = document.getElementById('autoRefreshStatus');
+    const logEntries = document.getElementById('logEntries');
     
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
         autoRefreshInterval = null;
         autoRefreshStatus.textContent = 'OFF';
+        logEntries.classList.remove('following');
         showNotification('Auto-refresh disabled', 'info');
     } else {
         autoRefreshInterval = setInterval(refreshLog, 2000);
         autoRefreshStatus.textContent = 'ON (2s)';
+        logEntries.classList.add('following');
         showNotification('Auto-refresh enabled', 'success');
     }
 }

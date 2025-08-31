@@ -31,9 +31,6 @@ jobs:
       run: |
         echo "Building firmware for ESP32-C3-DevKitC-02..."
         pio run -e esp32-c3-devkitc-02
-        
-        echo "Building firmware for native environment (tests)..."
-        pio run -e native
     
     - name: Run tests
       run: |

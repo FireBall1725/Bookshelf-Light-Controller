@@ -23,6 +23,12 @@
             <div class="config-controls">
                 <a href="/config" class="config-btn mqtt">MQTT Settings</a>
                 <a href="/wifi" class="config-btn wifi">WiFi Settings</a>
+                <button onclick="toggleSection('device-info')" class="config-btn device-info">
+                    <i class="fas fa-microchip"></i> Device Info
+                </button>
+                <button onclick="toggleSection('system-log')" class="config-btn system-log">
+                    <i class="fas fa-terminal"></i> System Log
+                </button>
             </div>
         </div>
         
@@ -127,7 +133,7 @@
         </div>
         
         <!-- Device Info Section -->
-        <div class="info">
+        <div id="device-info" class="info" style="display: none;">
             <h3>Device Info</h3>
             <p><strong>Chip:</strong> ESP32-C3</p>
             <p><strong>MAC Address:</strong> <span id="macAddress">Loading...</span></p>
@@ -138,7 +144,7 @@
         </div>
         
         <!-- System Log Section -->
-        <div class="log-section">
+        <div id="system-log" class="log-section" style="display: none;">
             <h3>System Log</h3>
             <div class="log-controls">
                 <button onclick="refreshLog()" class="control-btn">Refresh Log</button>

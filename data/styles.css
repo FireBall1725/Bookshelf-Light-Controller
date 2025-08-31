@@ -107,6 +107,14 @@ h1 i {
     background: linear-gradient(45deg, #fd7e14, #e83e8c);
 }
 
+.config-btn.device-info {
+    background: linear-gradient(45deg, #17a2b8, #138496);
+}
+
+.config-btn.system-log {
+    background: linear-gradient(45deg, #6c757d, #495057);
+}
+
 /* LED Control Section */
 .led-control {
     margin: 30px 0;

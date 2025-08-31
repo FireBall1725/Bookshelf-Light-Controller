@@ -807,6 +807,43 @@ function startPeriodicUpdates() {
 
 
 
+// Section Toggle Functions
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            // If it's the system log, refresh it when showing
+            if (sectionId === 'system-log') {
+                refreshLog();
+            }
+            // If it's device info, refresh the data when showing
+            if (sectionId === 'device-info') {
+                // Trigger a device info update
+                fetch('/uptime')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (document.getElementById('uptime')) {
+                            document.getElementById('uptime').textContent = data.uptime;
+                        }
+                        if (document.getElementById('macAddress')) {
+                            document.getElementById('macAddress').textContent = data.mac;
+                        }
+                        if (document.getElementById('ipAddress')) {
+                            document.getElementById('ipAddress').textContent = data.ip;
+                        }
+                        if (document.getElementById('rssi')) {
+                            document.getElementById('rssi').textContent = data.rssi + ' dBm';
+                        }
+                    })
+                    .catch(error => console.error('Error updating device info:', error));
+            }
+        } else {
+            section.style.display = 'none';
+        }
+    }
+}
+
 // Utility Functions
 function showNotification(message, type = 'info') {
     // Create notification element

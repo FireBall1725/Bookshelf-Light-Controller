@@ -119,18 +119,14 @@ EOF
       uses: actions/upload-artifact@v3
       with:
         name: firmware-${{ github.sha }}
-        path: |
-          firmware-v*.bin
-          firmware-*.meta
+        path: firmware-v*.bin, firmware-*.meta
         retention-days: 30
     
     - name: Create GitHub Release
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          firmware-v*.bin
-          firmware-*.meta
+        files: firmware-v*.bin, firmware-*.meta
         tag_name: v${{ github.sha }}
         name: Firmware Build ${{ github.sha }}
         body: |

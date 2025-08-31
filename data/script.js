@@ -635,45 +635,33 @@ function formatLogData(logData) {
         return '<div class="log-entry">No log entries found</div>';
     }
     
-    // Try to split by timestamp patterns first
-    const timestampPattern = /(\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\])/g;
-    const parts = logData.split(timestampPattern);
-    
+    // Split the log data into lines and process each line
+    const lines = logData.split('\n');
     let formattedHtml = '';
-    let currentEntry = '';
     
-    for (let i = 0; i < parts.length; i++) {
-        const part = parts[i].trim();
-        if (part === '') continue;
+    lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine === '') return;
         
-        if (part.match(/^\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\]$/)) {
-            // This is a timestamp, start a new log entry
-            if (currentEntry !== '') {
-                // Close the previous entry if it exists
-                formattedHtml += '<span class="log-message">' + currentEntry + '</span></div>';
+        // Check if line starts with a timestamp pattern [Xs]
+        const timestampMatch = trimmedLine.match(/^(\[\d+[smh]\s*\d*[smh]?\s*\d*[smh]?\])/);
+        
+        if (timestampMatch) {
+            // Line has timestamp - format it properly
+            const timestamp = timestampMatch[1];
+            const message = trimmedLine.substring(timestamp.length).trim();
+            
+            formattedHtml += '<div class="log-entry">';
+            formattedHtml += '<span class="log-timestamp">' + timestamp + '</span>';
+            if (message) {
+                formattedHtml += '<span class="log-message"> ' + message + '</span>';
             }
-            formattedHtml += '<div class="log-entry"><span class="log-timestamp">' + part + '</span>';
-            currentEntry = '';
-        } else if (part.length > 0) {
-            // This is log message content
-            currentEntry += part;
+            formattedHtml += '</div>';
+        } else {
+            // Regular line without timestamp
+            formattedHtml += '<div class="log-entry">' + trimmedLine + '</div>';
         }
-    }
-    
-    // Close the last entry if it exists
-    if (currentEntry !== '') {
-        formattedHtml += '<span class="log-message">' + currentEntry + '</span></div>';
-    }
-    
-    // If no proper formatting was applied, fall back to simple line splitting
-    if (formattedHtml === '') {
-        const lines = logData.split('\n');
-        lines.forEach(line => {
-            if (line.trim() !== '') {
-                formattedHtml += '<div class="log-entry">' + line + '</div>';
-            }
-        });
-    }
+    });
     
     return formattedHtml;
 }
@@ -862,13 +850,7 @@ function refreshLogForModal() {
         .then(data => {
             const logEntries = document.getElementById('modalLogEntries');
             if (logEntries) {
-                // Use the same formatting function as the main page
                 logEntries.innerHTML = formatLogData(data);
-                
-                // Apply auto-scroll if enabled
-                if (logEntries.classList.contains('auto-scroll')) {
-                    logEntries.scrollTop = logEntries.scrollHeight;
-                }
             }
         })
         .catch(error => {

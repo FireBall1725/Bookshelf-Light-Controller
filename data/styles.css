@@ -458,41 +458,6 @@ h1 i {
     animation: bounce 1s infinite;
 }
 
-/* Modal log entries styling to match main page */
-#modalLogEntries {
-    background: #1a1a1a;
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.4;
-    padding: 20px;
-    border-radius: 10px;
-    max-height: 400px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    position: relative;
-}
-
-#modalLogEntries::-webkit-scrollbar {
-    width: 12px;
-}
-
-#modalLogEntries::-webkit-scrollbar-track {
-    background: #1a1a1a;
-    border-radius: 6px;
-}
-
-#modalLogEntries::-webkit-scrollbar-thumb {
-    background: #404040;
-    border-radius: 6px;
-    border: 2px solid #1a1a1a;
-}
-
-#modalLogEntries::-webkit-scrollbar-thumb:hover {
-    background: #505050;
-}
-
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -1139,4 +1104,81 @@ h1 i {
     .firmware-modal-body {
         padding: 20px;
     }
+}
+
+/* Modal log entries styling to match main page */
+#modalLogEntries {
+    background: #1a1a1a;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    position: relative;
+}
+
+#modalLogEntries::-webkit-scrollbar {
+    width: 12px;
+}
+
+#modalLogEntries::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 6px;
+}
+
+#modalLogEntries::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 6px;
+    border: 2px solid #1a1a1a;
+}
+
+#modalLogEntries::-webkit-scrollbar-thumb:hover {
+    background: #505050;
+}
+
+/* Terminal-style log entries for the modal */
+#modalLogEntries .log-entry {
+    margin: 2px 0;
+    padding: 4px 0;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: block;
+    font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #00ff00;
+    transition: none;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+#modalLogEntries .log-entry:hover {
+    transform: none;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+#modalLogEntries .log-entry:nth-child(even) {
+    background: transparent;
+}
+
+#modalLogEntries .log-timestamp {
+    color: #00aa00;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+    margin-right: 8px;
+}
+
+#modalLogEntries .log-message {
+    color: #00ff00;
+    font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
 }

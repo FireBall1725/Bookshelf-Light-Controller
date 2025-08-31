@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 // Mock Arduino types - ESP32 environment already provides these
 // No need to redefine uint32_t, uint8_t, size_t, or boolean

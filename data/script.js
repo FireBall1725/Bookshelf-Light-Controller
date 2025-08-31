@@ -260,6 +260,9 @@ function loadFirmwareMetadata(filename, index) {
 }
 
 function showFirmwareInfoModal(features, filename) {
+    // Format the features content properly
+    const formattedFeatures = formatFirmwareFeatures(features);
+    
     // Create a modal to display firmware information
     const modalHtml = `
         <div id="firmwareModal" class="firmware-modal">
@@ -269,7 +272,7 @@ function showFirmwareInfoModal(features, filename) {
                     <span class="firmware-modal-close" onclick="closeFirmwareModal()">&times;</span>
                 </div>
                 <div class="firmware-modal-body">
-                    ${features}
+                    ${formattedFeatures}
                 </div>
             </div>
         </div>
@@ -283,6 +286,34 @@ function showFirmwareInfoModal(features, filename) {
     
     // Show modal
     $('#firmwareModal').fadeIn(300);
+}
+
+function formatFirmwareFeatures(features) {
+    // Split the features string and format it properly
+    const lines = features.split(',');
+    let formattedHtml = '';
+    
+    lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine === '') return;
+        
+        if (index === 0) {
+            // First line is the description
+            formattedHtml += `<div class="firmware-info-description">${trimmedLine}</div>`;
+        } else if (index === 1) {
+            // Second line is the "Firmware Features:" title
+            formattedHtml += `<div class="firmware-info-title">${trimmedLine}</div>`;
+        } else {
+            // Remaining lines are features with bullet points
+            if (trimmedLine.startsWith('•')) {
+                formattedHtml += `<div class="firmware-info-feature">${trimmedLine}</div>`;
+            } else {
+                formattedHtml += `<div class="firmware-info-feature">• ${trimmedLine}</div>`;
+            }
+        }
+    });
+    
+    return formattedHtml;
 }
 
 function closeFirmwareModal() {
@@ -330,7 +361,8 @@ function parseRealFirmwareMetadata(infoText, filename) {
         features.push('• Firmware update framework');
     }
     
-    return features;
+    // Return as a comma-separated string for the modal formatter
+    return features.join(',');
 }
 
 function displayFirmwareFeatures(features, container) {

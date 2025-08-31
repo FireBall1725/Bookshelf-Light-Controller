@@ -1,0 +1,36 @@
+{
+  "firmware": {
+    "version": "1.0.0",
+    "description": "FireLabs I2C Bookshelf RGBCCT Light Controller",
+    "board": "FL-LC01"
+  },
+  "target": {
+    "board": "ESP32-C3-DevKitC-02",
+    "platform": "espressif32",
+    "framework": "arduino",
+    "upload_protocol": "esptool"
+  },
+  "features": [
+    "WiFi connectivity with WiFiManager",
+    "Web-based configuration interface",
+    "I2C communication for LED control",
+    "SPIFFS file system for data storage",
+    "Home Assistant MQTT integration",
+    "Firmware update capability",
+    "RGB+CCT LED control",
+    "Configuration management"
+  ],
+  "build_info": {
+    "timestamp": "2025-01-30T12:00:00.000000",
+    "platformio_version": "6.1.0",
+    "python_version": "3.11.0"
+  },
+  "files": {
+    "firmware_bin": {
+      "name": "firmware.bin",
+      "size_bytes": 0,
+      "size_kb": 0,
+      "description": "ESP32 firmware binary file"
+    }
+  }
+}

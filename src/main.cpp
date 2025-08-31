@@ -12,6 +12,11 @@
 #include "ConfigManager.h"
 #include "WebHandler.h"
 
+// Firmware version and board information
+#define FIRMWARE_VERSION "1.0.0"
+#define BOARD_MODEL "FL-LC01"
+#define BOARD_DESCRIPTION "FireLabs I2C Bookshelf RGBCCT Light Controller"
+
 // WiFi and Web Server
 WebServer server(80);
 WiFiManager wifiManager;

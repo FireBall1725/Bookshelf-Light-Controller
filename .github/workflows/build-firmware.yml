@@ -131,15 +131,15 @@ EOF
         files: |
           firmware-v*.bin
           firmware-*.meta
-        tag_name: v${{ env.FULL_VERSION }}
-        name: Firmware v${{ env.FULL_VERSION }}
+        tag_name: v${{ github.sha }}
+        name: Firmware Build ${{ github.sha }}
         body: |
-          ## Firmware Release v${{ env.FULL_VERSION }}
+          ## Firmware Release
           
           **Build Info:**
-          - Git Hash: ${{ env.GIT_HASH }}
+          - Git Hash: ${{ github.sha }}
           - Build Date: ${{ github.event.head_commit.timestamp }}
-          - PlatformIO: ${{ env.PLATFORMIO_VERSION }}
+          - Commit Message: ${{ github.event.head_commit.message }}
           
           **Features:**
           - WiFi connectivity with WiFiManager
@@ -162,6 +162,3 @@ EOF
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        FULL_VERSION: ${{ env.FULL_VERSION }}
-        GIT_HASH: ${{ env.GIT_HASH }}
-        PLATFORMIO_VERSION: ${{ env.PLATFORMIO_VERSION }}

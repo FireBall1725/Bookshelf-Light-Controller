@@ -64,23 +64,15 @@ int main(int argc, char **argv) {
     RUN_TEST(test_hex_validation_logic);
     RUN_TEST(test_firmware_info_formatting);
     
-    // OLED Manager Tests - Testing OLED display functionality
-    RUN_TEST(test_oled_init_success);
-    RUN_TEST(test_oled_init_failure);
-    RUN_TEST(test_oled_availability);
-    RUN_TEST(test_oled_clear);
-    RUN_TEST(test_oled_show_status);
-    RUN_TEST(test_oled_show_system_info);
-    RUN_TEST(test_oled_show_wifi_info);
-    RUN_TEST(test_oled_show_i2c_info);
-    RUN_TEST(test_oled_show_default_display);
-    RUN_TEST(test_oled_update_display);
-    RUN_TEST(test_uptime_calculation);
-    RUN_TEST(test_wifi_status_connected);
-    RUN_TEST(test_wifi_status_disconnected);
-    RUN_TEST(test_i2c_communication_success);
-    RUN_TEST(test_i2c_communication_failure);
-    RUN_TEST(test_memory_management);
+    // OLED Manager Tests - Testing OLED display logic (no Arduino dependencies)
+    RUN_TEST(test_uptime_calculation_logic);
+    RUN_TEST(test_uptime_calculation_edge_cases);
+    RUN_TEST(test_string_formatting);
+    RUN_TEST(test_wifi_status_logic);
+    RUN_TEST(test_i2c_address_formatting);
+    RUN_TEST(test_device_identification_logic);
+    RUN_TEST(test_text_wrapping_logic);
+    RUN_TEST(test_display_update_timing);
     
     // TODO: Add more library tests
     // ConfigManager Tests

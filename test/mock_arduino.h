@@ -11,6 +11,16 @@
 // Mock Arduino types - ESP32 environment already provides these
 // No need to redefine uint32_t, uint8_t, size_t, or boolean
 
+// Additional Arduino types
+typedef uint8_t byte;
+
+// WiFi status constants
+#define WL_CONNECTED 3
+#define WL_DISCONNECTED 6
+
+// Arduino constants
+#define HEX 16
+
 // Mock Arduino functions - declarations only
 unsigned long millis();
 void delay(unsigned long ms);
@@ -27,6 +37,7 @@ public:
     ArduinoString(const std::string& str) : data(str) {}
     ArduinoString(int value) : data(std::to_string(value)) {}
     ArduinoString(unsigned long value) : data(std::to_string(value)) {}
+    ArduinoString(int value, int base) : data(std::to_string(value)) {} // Simplified for testing
     
     const char* c_str() const { return data.c_str(); }
     int indexOf(const std::string& str) const { 

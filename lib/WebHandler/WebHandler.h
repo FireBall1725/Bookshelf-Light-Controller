@@ -25,6 +25,7 @@ public:
     // API endpoints
     static void handleLED();
     static void handleUptime();
+    static void handleTime();
     static void handleLog();
     static void handleClearLog();
     static void handleScanI2C();

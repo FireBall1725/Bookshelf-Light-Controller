@@ -1,6 +1,7 @@
 #include "WebHandler.h"
 #include <WiFi.h>
 #include <WebServer.h>
+#include "TimeManager.h"
 
 // Static member initialization
 WebServer* WebHandler::webServer = nullptr;
@@ -23,6 +24,7 @@ void WebHandler::setupRoutes() {
     // API endpoints
     webServer->on("/led", HTTP_GET, handleLED);
     webServer->on("/uptime", HTTP_GET, handleUptime);
+    webServer->on("/time", HTTP_GET, handleTime);
     webServer->on("/log", HTTP_GET, handleLog);
     webServer->on("/clearlog", HTTP_GET, handleClearLog);
     webServer->on("/scani2c", HTTP_GET, handleScanI2C);
@@ -119,6 +121,12 @@ void WebHandler::handleLED() {
 
 void WebHandler::handleUptime() {
     String response = "{\"uptime\":\"" + getUptimeString() + "\",\"mac\":\"" + getMACAddress() + "\",\"ip\":\"" + getIPAddress() + "\",\"rssi\":" + String(getWiFiRSSI()) + "}";
+    webServer->send(200, "application/json", response);
+}
+
+void WebHandler::handleTime() {
+    String response = "{\"valid\":" + String(timeManager.isTimeValid() ? "true" : "false") + 
+                     ",\"time\":\"" + timeManager.getFormattedDateTime() + "\"}";
     webServer->send(200, "application/json", response);
 }
 

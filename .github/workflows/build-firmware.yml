@@ -129,31 +129,7 @@ EOF
         files: firmware-v*.bin, firmware-*.meta
         tag_name: v${{ github.sha }}
         name: Firmware Build ${{ github.sha }}
-        body: |
-          ## Firmware Release
-          
-          **Build Info:**
-          - Git Hash: ${{ github.sha }}
-          - Build Date: ${{ github.event.head_commit.timestamp }}
-          - Commit Message: ${{ github.event.head_commit.message }}
-          
-          **Features:**
-          - WiFi connectivity with WiFiManager
-          - Web-based configuration interface
-          - I2C communication for LED control
-          - SPIFFS file system for data storage
-          - Home Assistant MQTT integration
-          - Firmware update capability
-          - RGB+CCT LED control
-          - Configuration management
-          
-          **Installation:**
-          1. Download the firmware binary
-          2. Use ESP32 flash tool to upload
-          3. Configure WiFi and settings via web interface
-          
-          **Changes:**
-          ${{ github.event.head_commit.message }}
+        body: "## Firmware Release\n\n**Build Info:**\n- Git Hash: ${{ github.sha }}\n- Build Date: ${{ github.event.head_commit.timestamp }}\n- Commit Message: ${{ github.event.head_commit.message }}\n\n**Features:**\n- WiFi connectivity with WiFiManager\n- Web-based configuration interface\n- I2C communication for LED control\n- SPIFFS file system for data storage\n- Home Assistant MQTT integration\n- Firmware update capability\n- RGB+CCT LED control\n- Configuration management\n\n**Installation:**\n1. Download the firmware binary\n2. Use ESP32 flash tool to upload\n3. Configure WiFi and settings via web interface\n\n**Changes:**\n${{ github.event.head_commit.message }}"
         draft: false
         prerelease: false
       env:

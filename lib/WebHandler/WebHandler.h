@@ -50,6 +50,12 @@ public:
     static void handleFirmwarePackageDelete();
     static void handleAllFirmware();
     
+    // I2C testing handlers
+    static void handleI2CQuickScan();
+    static void handleI2CTestCommon();
+    static void handleUpdateI2CPins();
+    static void handleReinitI2C();
+    
     // API endpoints for configuration
     static void handleAPIConfig();
     static void handleAPIWiFi();

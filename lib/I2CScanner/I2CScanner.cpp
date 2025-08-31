@@ -1,33 +1,107 @@
 #include "I2CScanner.h"
 #include "Logger.h"
 
+// Initialize with default ESP32-C3-DevKitC-02 I2C pins
+int I2CScanner::SDA_PIN = 8;  // Default SDA pin for ESP32-C3
+int I2CScanner::SCL_PIN = 10; // Default SCL pin for ESP32-C3
+
 void I2CScanner::init() {
+    init(SDA_PIN, SCL_PIN);
+}
+
+void I2CScanner::init(int sdaPin, int sclPin) {
+    SDA_PIN = sdaPin;
+    SCL_PIN = sclPin;
+    
     Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.setClock(100000); // Set to 100kHz for better compatibility
+    
     Logger::addEntry("I2C initialized on SDA:GPIO" + String(SDA_PIN) + ", SCL:GPIO" + String(SCL_PIN));
+    Logger::addEntry("I2C clock speed set to 100kHz");
+    
+    // Test I2C bus with a simple scan
+    Logger::addEntry("Testing I2C bus...");
+    int testCount = 0;
+    for (byte addr = 1; addr < 10; addr++) {
+        if (testAddress(addr)) testCount++;
+    }
+    Logger::addEntry("Quick test scan found " + String(testCount) + " devices in low address range");
 }
 
 String I2CScanner::scan() {
     Logger::addEntry("Starting I2C bus scan...");
     int deviceCount = 0;
+    String result = "I2C Scan Results:\n";
     
     for (byte address = SCAN_START; address < SCAN_END; address++) {
-        Wire.beginTransmission(address);
-        byte error = Wire.endTransmission();
-        
-        if (error == 0) {
+        if (testAddress(address)) {
             deviceCount++;
             String deviceInfo = getDeviceInfo(address);
             Logger::addEntry(deviceInfo);
+            result += deviceInfo + "\n";
         }
     }
     
     if (deviceCount == 0) {
         Logger::addEntry("No I2C devices found");
+        result = "No I2C devices found";
     } else {
         Logger::addEntry("I2C scan complete. Found " + String(deviceCount) + " device(s)");
+        result += "\nTotal devices found: " + String(deviceCount);
     }
     
-    return "I2C scan complete. Found " + String(deviceCount) + " device(s)";
+    return result;
+}
+
+String I2CScanner::scanWithDetails() {
+    Logger::addEntry("Starting detailed I2C bus scan...");
+    int deviceCount = 0;
+    String result = "Detailed I2C Scan Results:\n";
+    
+    // Test common OLED addresses first
+    byte commonAddresses[] = {0x3C, 0x3D, 0x27, 0x20, 0x48, 0x68, 0x76, 0x77};
+    result += "Testing common addresses first:\n";
+    
+    for (byte addr : commonAddresses) {
+        if (testAddress(addr)) {
+            deviceCount++;
+            String deviceInfo = getDeviceInfo(addr);
+            Logger::addEntry("Common device found: " + deviceInfo);
+            result += "✓ " + deviceInfo + "\n";
+        }
+    }
+    
+    // Full scan
+    result += "\nFull address scan:\n";
+    for (byte address = SCAN_START; address < SCAN_END; address++) {
+        if (testAddress(address)) {
+            deviceCount++;
+            String deviceInfo = getDeviceInfo(address);
+            Logger::addEntry(deviceInfo);
+            result += "✓ " + deviceInfo + "\n";
+        }
+    }
+    
+    if (deviceCount == 0) {
+        Logger::addEntry("No I2C devices found");
+        result = "No I2C devices found\n\nTroubleshooting tips:\n";
+        result += "1. Check wiring (SDA:GPIO" + String(SDA_PIN) + ", SCL:GPIO" + String(SCL_PIN) + ")\n";
+        result += "2. Verify power to OLED display\n";
+        result += "3. Check pull-up resistors (4.7kΩ recommended)\n";
+        result += "4. Try different I2C addresses\n";
+        result += "5. Verify OLED is I2C compatible\n";
+    } else {
+        Logger::addEntry("Detailed I2C scan complete. Found " + String(deviceCount) + " device(s)");
+        result += "\nTotal devices found: " + String(deviceCount);
+    }
+    
+    return result;
+}
+
+bool I2CScanner::testAddress(byte address) {
+    Wire.beginTransmission(address);
+    byte error = Wire.endTransmission();
+    return (error == 0);
 }
 
 void I2CScanner::sendCommand(byte command) {

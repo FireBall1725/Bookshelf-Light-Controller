@@ -26,6 +26,11 @@ void WebHandler::setupRoutes() {
     webServer->on("/log", HTTP_GET, handleLog);
     webServer->on("/clearlog", HTTP_GET, handleClearLog);
     webServer->on("/scani2c", HTTP_GET, handleScanI2C);
+    webServer->on("/i2c_scan", HTTP_GET, handleScanI2C);
+    webServer->on("/i2c_quick_scan", HTTP_GET, handleI2CQuickScan);
+    webServer->on("/i2c_test_common", HTTP_GET, handleI2CTestCommon);
+    webServer->on("/update_i2c_pins", HTTP_POST, handleUpdateI2CPins);
+    webServer->on("/reinit_i2c", HTTP_GET, handleReinitI2C);
     webServer->on("/i2ccmd", HTTP_GET, handleI2CCommand);
     webServer->on("/versioncheck", HTTP_GET, handleVersionCheck);
     webServer->on("/firmwareupload", HTTP_POST, []() {
@@ -502,4 +507,80 @@ void WebHandler::handleAllFirmware() {
     String allFirmwareInfo = FirmwareUpdater::getAllFirmwareInfo();
     Logger::addEntry("getAllFirmwareInfo returned: " + allFirmwareInfo.substring(0, 100) + "...");
     webServer->send(200, "text/plain", allFirmwareInfo);
+}
+
+// New I2C testing handlers
+void WebHandler::handleI2CQuickScan() {
+    Logger::addEntry("Quick I2C scan requested");
+    String result = "Quick I2C Scan Results:\n";
+    
+    int deviceCount = 0;
+    for (byte addr = 1; addr < 10; addr++) {
+        Wire.beginTransmission(addr);
+        byte error = Wire.endTransmission();
+        if (error == 0) {
+            deviceCount++;
+            result += "Device found at 0x" + String(addr, HEX) + "\n";
+        }
+    }
+    
+    result += "\nQuick scan complete. Found " + String(deviceCount) + " device(s) in low address range";
+    webServer->send(200, "text/plain", result);
+}
+
+void WebHandler::handleI2CTestCommon() {
+    Logger::addEntry("Common I2C address test requested");
+    String result = "Common I2C Address Test Results:\n";
+    
+    byte commonAddresses[] = {0x3C, 0x3D, 0x27, 0x20, 0x48, 0x68, 0x76, 0x77};
+    int deviceCount = 0;
+    
+    for (byte addr : commonAddresses) {
+        Wire.beginTransmission(addr);
+        byte error = Wire.endTransmission();
+        if (error == 0) {
+            deviceCount++;
+            result += "✓ Device found at 0x" + String(addr, HEX);
+            
+            // Identify device type
+            if (addr == 0x3C || addr == 0x3D) {
+                result += " - Likely OLED Display";
+            } else if (addr == 0x27) {
+                result += " - Likely LCD Display";
+            } else if (addr == 0x20) {
+                result += " - Likely I/O Expander";
+            }
+            result += "\n";
+        } else {
+            result += "✗ No device at 0x" + String(addr, HEX) + "\n";
+        }
+    }
+    
+    result += "\nCommon address test complete. Found " + String(deviceCount) + " device(s)";
+    webServer->send(200, "text/plain", result);
+}
+
+void WebHandler::handleUpdateI2CPins() {
+    if (webServer->hasArg("sda") && webServer->hasArg("scl")) {
+        int sdaPin = webServer->arg("sda").toInt();
+        int sclPin = webServer->arg("scl").toInt();
+        
+        Logger::addEntry("Updating I2C pins to SDA:GPIO" + String(sdaPin) + ", SCL:GPIO" + String(sclPin));
+        
+        // Reinitialize I2C with new pins
+        I2CScanner::init(sdaPin, sclPin);
+        
+        webServer->send(200, "text/plain", "I2C pins updated to SDA:GPIO" + String(sdaPin) + ", SCL:GPIO" + String(sclPin));
+    } else {
+        webServer->send(400, "text/plain", "Missing SDA or SCL parameter");
+    }
+}
+
+void WebHandler::handleReinitI2C() {
+    Logger::addEntry("Reinitializing I2C bus");
+    
+    // Reinitialize with current pins
+    I2CScanner::init();
+    
+    webServer->send(200, "text/plain", "I2C bus reinitialized");
 }

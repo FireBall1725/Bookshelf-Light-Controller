@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I2C Bus Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .pin-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .pin-input {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .troubleshooting {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔌 I2C Bus Testing & Debugging</h1>
+    
+    <div class="container">
+        <h2>📌 Pin Configuration</h2>
+        <div class="pin-config">
+            <div class="pin-input">
+                <label for="sdaPin">SDA Pin:</label>
+                <select id="sdaPin">
+                    <option value="8" selected>GPIO 8 (Default for ESP32-C3)</option>
+                    <option value="4">GPIO 4</option>
+                    <option value="5">GPIO 5</option>
+                    <option value="6">GPIO 6</option>
+                    <option value="7">GPIO 7</option>
+                    <option value="9">GPIO 9</option>
+                    <option value="10">GPIO 10</option>
+                    <option value="11">GPIO 11</option>
+                    <option value="12">GPIO 12</option>
+                </select>
+            </div>
+            <div class="pin-input">
+                <label for="sclPin">SCL Pin:</label>
+                <select id="sclPin">
+                    <option value="10" selected>GPIO 10 (Default for ESP32-C3)</option>
+                    <option value="4">GPIO 4</option>
+                    <option value="5">GPIO 5</option>
+                    <option value="6">GPIO 6</option>
+                    <option value="7">GPIO 7</option>
+                    <option value="8">GPIO 8</option>
+                    <option value="9">GPIO 9</option>
+                    <option value="11">GPIO 11</option>
+                    <option value="12">GPIO 12</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="updatePins()">Update I2C Pins</button>
+        <button onclick="reinitializeI2C()">Reinitialize I2C</button>
+    </div>
+
+    <div class="container">
+        <h2>🔍 I2C Scanning</h2>
+        <button onclick="quickScan()">Quick Scan (Low Addresses)</button>
+        <button onclick="fullScan()">Full Scan (All Addresses)</button>
+        <button onclick="detailedScan()">Detailed Scan (Common + Full)</button>
+        <button onclick="testCommonAddresses()">Test Common OLED Addresses</button>
+        
+        <div id="scanStatus"></div>
+        <div id="scanResults" class="results"></div>
+    </div>
+
+    <div class="troubleshooting">
+        <h3>🔧 Troubleshooting Tips</h3>
+        <ul>
+            <li><strong>Wiring:</strong> Ensure SDA and SCL are connected to the correct GPIO pins</li>
+            <li><strong>Power:</strong> Verify your OLED display has proper power (3.3V for ESP32)</li>
+            <li><strong>Pull-up Resistors:</strong> Use 4.7kΩ resistors on both SDA and SCL lines</li>
+            <li><strong>Address:</strong> Most OLED displays use 0x3C or 0x3D</li>
+            <li><strong>Ground:</strong> Make sure ESP32 and OLED share a common ground</li>
+            <li><strong>Voltage Levels:</strong> ESP32 uses 3.3V logic, ensure OLED is 3.3V compatible</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>📊 Common I2C Addresses</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f8f9fa;">
+                <th style="border: 1px solid #dee2e6; padding: 8px;">Address</th>
+                <th style="border: 1px solid #dee2e6; padding: 8px;">Device Type</th>
+                <th style="border: 1px solid #dee2e6; padding: 8px;">Common Uses</th>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">0x3C</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">OLED Display</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">SSD1306, SH1106</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">0x3D</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">OLED Display</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">Alternative address</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">0x27</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">LCD Display</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">PCF8574 I2C expander</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">0x20</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">I/O Expander</td>
+                <td style="border: 1px solid #dee2e6; padding: 8px;">MCP23008</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('scanStatus');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function clearResults() {
+            document.getElementById('scanResults').textContent = '';
+        }
+
+        async function makeRequest(url, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {}
+                };
+                
+                if (body) {
+                    options.body = body;
+                    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                }
+
+                const response = await fetch(url, options);
+                const result = await response.text();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${result}`);
+                }
+                
+                return result;
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function updatePins() {
+            const sdaPin = document.getElementById('sdaPin').value;
+            const sclPin = document.getElementById('sclPin').value;
+            
+            showStatus(`Updating I2C pins to SDA:GPIO${sdaPin}, SCL:GPIO${sclPin}...`, 'info');
+            
+            try {
+                const body = `sda=${sdaPin}&scl=${sclPin}`;
+                const result = await makeRequest('/update_i2c_pins', 'POST', body);
+                showStatus('I2C pins updated successfully!', 'success');
+                clearResults();
+            } catch (error) {
+                showStatus('Failed to update I2C pins', 'error');
+            }
+        }
+
+        async function reinitializeI2C() {
+            showStatus('Reinitializing I2C bus...', 'info');
+            
+            try {
+                const result = await makeRequest('/reinit_i2c');
+                showStatus('I2C reinitialized successfully!', 'success');
+                clearResults();
+            } catch (error) {
+                showStatus('Failed to reinitialize I2C', 'error');
+            }
+        }
+
+        async function quickScan() {
+            showStatus('Performing quick scan...', 'info');
+            clearResults();
+            
+            try {
+                const result = await makeRequest('/i2c_quick_scan');
+                document.getElementById('scanResults').textContent = result;
+                showStatus('Quick scan completed!', 'success');
+            } catch (error) {
+                showStatus('Quick scan failed', 'error');
+            }
+        }
+
+        async function fullScan() {
+            showStatus('Performing full scan...', 'info');
+            clearResults();
+            
+            try {
+                const result = await makeRequest('/i2c_scan');
+                document.getElementById('scanResults').textContent = result;
+                showStatus('Full scan completed!', 'success');
+            } catch (error) {
+                showStatus('Full scan failed', 'error');
+            }
+        }
+
+        async function detailedScan() {
+            showStatus('Performing detailed scan...', 'info');
+            clearResults();
+            
+            try {
+                const result = await makeRequest('/i2c_scan');
+                document.getElementById('scanResults').textContent = result;
+                showStatus('Detailed scan completed!', 'success');
+            } catch (error) {
+                showStatus('Detailed scan failed', 'error');
+            }
+        }
+
+        async function testCommonAddresses() {
+            showStatus('Testing common OLED addresses...', 'info');
+            clearResults();
+            
+            try {
+                const result = await makeRequest('/i2c_test_common');
+                document.getElementById('scanResults').textContent = result;
+                showStatus('Common address test completed!', 'success');
+            } catch (error) {
+                showStatus('Common address test failed', 'error');
+            }
+        }
+
+        // Auto-scan on page load
+        window.onload = function() {
+            showStatus('I2C Testing page loaded. Ready to scan!', 'info');
+        };
+    </script>
+</body>
+</html>

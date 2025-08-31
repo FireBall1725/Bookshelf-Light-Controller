@@ -251,6 +251,22 @@ h1 i {
     color: white;
     transition: all 0.3s ease;
     font-size: 0.9em;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* Special styling for the refresh button to make it more prominent */
+.firmware-table-header .control-btn {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    font-weight: 600;
+    border: 2px solid #27ae60;
+}
+
+.firmware-table-header .control-btn:hover {
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
 }
 
 .control-btn:hover:not(:disabled) {
